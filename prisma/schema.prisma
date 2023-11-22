@@ -1,0 +1,64 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = "mysql://atul:Sil@1234@localhost:3306/data-timesheet"
+}
+
+
+
+// Employee table
+model Employee {
+  EmployeeID   Int      @id @default(autoincrement())
+  FirstName    String
+  LastName     String
+  Email        String
+  Password     String   
+  Admin        Boolean
+  EmployeeType String   // Assuming "regular" or "manager"
+
+  // Relationships
+  Timesheets   Timesheet[]
+}
+
+// Client table
+model Client {
+  ClientID      Int       @id @default(autoincrement())
+  ClientName    String
+  ContactPerson String
+  ContactEmail  String
+ 
+
+  // Relationships
+  Projects      Project[]
+}
+
+// Project table
+model Project {
+  ProjectID     Int      @id @default(autoincrement())
+  ProjectName   String
+  ClientID      Int
+ 
+
+  // Relationships
+  Client        Client   @relation(fields: [ClientID], references: [ClientID])
+  Timesheets    Timesheet[]
+}
+
+// Timesheet table
+model Timesheet {
+  TimesheetID   Int      @id @default(autoincrement())
+  EmployeeID    Int
+  ProjectID     Int
+  Date          DateTime
+  Status        String
+  HoursWorked   Float
+  Description   String
+  
+  // Relationships
+  Employee      Employee @relation(fields: [EmployeeID], references: [EmployeeID])
+  Project       Project  @relation(fields: [ProjectID], references: [ProjectID])
+}
