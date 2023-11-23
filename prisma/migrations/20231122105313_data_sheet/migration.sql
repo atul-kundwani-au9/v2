@@ -6,5 +6,5 @@
 
 */
 -- AlterTable
-ALTER TABLE `timesheet` DROP COLUMN `dateTime`,
-    ADD COLUMN `Date` DATETIME(3) NOT NULL;
+-- ALTER TABLE `timesheet` DROP COLUMN `dateTime`,
+--     ADD COLUMN `Date` DATETIME(3) NOT NULL;
