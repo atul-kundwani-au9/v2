@@ -2,7 +2,7 @@ const timesheetModel = require('../models/timesheetModel');
 
 const createTimesheet = async (req, res) => {
   try {
-    const { EmployeeID, ProjectID, Status, HoursWorked, Description } = req.body;
+    const { EmployeeID, ProjectID, Status,Date, HoursWorked, Description } = req.body;
 
     
     const currentDate = new Date().toISOString();

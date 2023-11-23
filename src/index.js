@@ -3,6 +3,7 @@ const employeeRoutes = require('./routes/employeeRoutes');
 const projectRoutes = require('./routes/projectRoutes');
 const clientRoutes = require('./routes/clientRoutes');
 const timesheetRoutes = require('./routes/timesheetRoutes')
+const reportRoutes = require('./routes/reportRoutes');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -10,6 +11,7 @@ app.use(express.json());
 
 // Use routes
 app.use('/employee', employeeRoutes);
+app.use('/report', reportRoutes);
 app.use('/project', projectRoutes);
 app.use('/client', clientRoutes);
 app.use('/timesheet', timesheetRoutes); 
