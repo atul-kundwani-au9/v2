@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE `employee` ADD COLUMN `DefaultClient` VARCHAR(191) NOT NULL DEFAULT '',
+    ADD COLUMN `DefaultHours` DOUBLE NOT NULL DEFAULT 8,
+    ADD COLUMN `DefaultProject` VARCHAR(191) NOT NULL DEFAULT '';

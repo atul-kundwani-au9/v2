@@ -17,7 +17,6 @@ const authMiddleware = require('../middleware/authMiddleware');
 // Public route for user registration
 router.post('/register', employeeController.registerEmployee);
 router.post('/login', employeeController.loginEmployee);
-// Protected route for getting the employee list
 router.get('/list', authMiddleware.authenticate, employeeController.getEmployeeList);
 
 module.exports = router;

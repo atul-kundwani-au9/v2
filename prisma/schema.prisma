@@ -9,13 +9,18 @@ datasource db {
 
 // Employee table
 model Employee {
-  EmployeeID   Int     @id @default(autoincrement())
-  FirstName    String
-  LastName     String
-  Email        String
-  Password     String
-  Admin        Boolean
-  EmployeeType String // Assuming "regular" or "manager"
+  EmployeeID     Int      @id @default(autoincrement())
+  FirstName      String
+  LastName       String
+  Email          String
+  Password       String
+  Admin          Boolean
+  EmployeeType   String   // Assuming "regular" or "manager"
+
+  // Default Values
+  DefaultHours    Float    @default(8)                 
+  DefaultProject  String   @default("")  
+  DefaultClient   String   @default("")   
 
   // Relationships
   Timesheets         Timesheet[]
@@ -25,7 +30,7 @@ model Employee {
 
 // Client table
 model Client {
-  ClientID      Int    @id @default(autoincrement())
+  ClientID      Int      @id @default(autoincrement())
   ClientName    String
   ContactPerson String
   ContactEmail  String
@@ -36,7 +41,7 @@ model Client {
 
 // Project table
 model Project {
-  ProjectID   Int    @id @default(autoincrement())
+  ProjectID   Int      @id @default(autoincrement())
   ProjectName String
   ClientID    Int
 
