@@ -7,6 +7,13 @@ const createEmployee = async (data) => {
     data,
   });
 };
+const getEmployeeByEmail = async (email) => {
+  return prisma.employee.findUnique({
+    where: {
+      Email: email,
+    },
+  });
+};
 
 const getEmployees = async () => {
   return prisma.employee.findMany();
@@ -14,5 +21,6 @@ const getEmployees = async () => {
 
 module.exports = {
   createEmployee,
+  getEmployeeByEmail,
   getEmployees,
 };
