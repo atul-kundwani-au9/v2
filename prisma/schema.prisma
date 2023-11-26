@@ -4,15 +4,16 @@ generator client {
 
 datasource db {
   provider = "mysql"
-  url      = "mysql://atul:Sil@1234@localhost:3306/data-timesheet"
+  url      = "mysql://root:Atul@localhost:3306/timesheet"
 }
+
 
 // Employee table
 model Employee {
   EmployeeID     Int      @id @default(autoincrement())
   FirstName      String
   LastName       String
-  Email          String
+  Email          String    @unique
   Password       String
   Admin          Boolean
   EmployeeType   String   // Assuming "regular" or "manager"

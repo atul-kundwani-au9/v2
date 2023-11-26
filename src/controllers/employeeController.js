@@ -76,8 +76,8 @@ const registerEmployee = async (req, res) => {
       EmployeeType,
     });
     
-    const token = generateToken({ id: employee.EmployeeID, email: employee.Email });
-    res.json({ employee, token });
+    
+    res.json({ employee });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
