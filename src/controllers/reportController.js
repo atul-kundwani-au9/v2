@@ -16,7 +16,8 @@ const getClientReport = async (req, res) => {
         Project: true,
       },
     });
-    res.json(clientReport);
+    const status = "success";
+    res.json(clientReport,status);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
@@ -35,6 +36,7 @@ const getProjectReport = async (req, res) => {
         Project: true,
       },
     });
+    
     res.json(projectReport);
   } catch (error) {
     console.error(error);
@@ -54,6 +56,7 @@ const getEmployeeReport = async (req, res) => {
         Project: true,
       },
     });
+    
     res.json(employeeReport);
   } catch (error) {
     console.error(error);

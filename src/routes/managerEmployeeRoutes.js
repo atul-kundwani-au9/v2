@@ -7,3 +7,6 @@ router.post('/createManagerEmployee',authMiddleware.authenticate, managerEmploye
 router.get('/getManagerEmployees',authMiddleware.authenticate, managerEmployeeController.getManagerEmployees);
 
 module.exports = router;
+
+
+

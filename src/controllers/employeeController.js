@@ -106,6 +106,7 @@ const loginEmployee = async (req, res) => {
 const getEmployeeList = async (req, res) => {
   try {
     const employees = await employeeModel.getEmployees();
+   
     res.json(employees);
   } catch (error) {
     console.error(error);

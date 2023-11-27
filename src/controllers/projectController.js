@@ -8,6 +8,7 @@ const createProject = async (req, res) => {
       ProjectName,
       ClientID,
     });
+   
     res.json(project);
   } catch (error) {
     console.error(error);
@@ -18,6 +19,7 @@ const createProject = async (req, res) => {
 const getProjectList = async (req, res) => {
   try {
     const projects = await projectModel.getProjects();
+    
     res.json(projects);
   } catch (error) {
     console.error(error);

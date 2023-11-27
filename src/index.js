@@ -36,8 +36,6 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
-// Apply authentication middleware to all routes below this line
-// app.use(authMiddleware.authenticate);
 app.get("/", authMiddleware.authenticate,(req,res) =>{
   res.send("")
 } )

@@ -56,16 +56,9 @@ const createTimesheet = async (req, res) => {
     });
 
     if (!existingEmployee) {
-      return res.status(404).json({ error: 'Employee not found' });
-    }
+      return res.status(404).json({ error: 'Employee not found' });    }
     
-    const TempDate = new Date(entryDate);
-    
-    // const isValidDate = !isNaN(new Date(entryDate).getTime());
-    // if (!isValidDate) {
-    //   return res.status(400).json({ error: 'Invalid date format for entryDate' });
-    // }
-     
+    const TempDate = new Date(entryDate);           
     const timesheetData = {
       EmployeeID,
       ProjectID,
@@ -73,8 +66,7 @@ const createTimesheet = async (req, res) => {
       Status,
       HoursWorked,
       Description,
-    };
-    
+    };    
     const timesheet = await timesheetModel.createTimesheet(timesheetData);
     res.json(timesheet);
   } catch (error) {
@@ -132,7 +124,6 @@ const pendingTimesheet = async (req, res) => {
   }
   
 };
-
 
 const rejectTimesheet = async (req, res) => {
   try {
