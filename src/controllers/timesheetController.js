@@ -39,9 +39,6 @@
 //   createTimesheet,
 //   getTimesheetList,
 // };
-
-
-
 const { PrismaClient } = require('@prisma/client');
 const timesheetModel = require('../models/timesheetModel');
 const prisma = new PrismaClient();
@@ -49,9 +46,9 @@ const prisma = new PrismaClient();
 const createTimesheet = async (req, res) => {
   console.log(req.body)
   try {
-    const { EmployeeID, ProjectID, entryDate,Status,Description, HoursWorked,  } = req.body;
+    const { EmployeeID, ProjectID, entryDate,Status,Description, HoursWorked } = req.body;
 
-   
+    console.log('entryDate:', entryDate);
     const existingEmployee = await prisma.employee.findUnique({
       where: {
         EmployeeID: EmployeeID,
@@ -61,8 +58,13 @@ const createTimesheet = async (req, res) => {
     if (!existingEmployee) {
       return res.status(404).json({ error: 'Employee not found' });
     }
-   
-    const TempDate = new Date(entryDate)
+    
+    const TempDate = new Date(entryDate);
+    
+    // const isValidDate = !isNaN(new Date(entryDate).getTime());
+    // if (!isValidDate) {
+    //   return res.status(400).json({ error: 'Invalid date format for entryDate' });
+    // }
      
     const timesheetData = {
       EmployeeID,
@@ -72,7 +74,7 @@ const createTimesheet = async (req, res) => {
       HoursWorked,
       Description,
     };
-
+    
     const timesheet = await timesheetModel.createTimesheet(timesheetData);
     res.json(timesheet);
   } catch (error) {
@@ -90,12 +92,76 @@ const getTimesheetList = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+const approveTimesheet = async (req, res) => {
+  try {
+    const { timesheetId } = req.params;
 
-module.exports = {
-  createTimesheet,
-  getTimesheetList,
+    const updatedTimesheet = await prisma.timesheet.update({
+      where: {
+        TimesheetID: parseInt(timesheetId, 10),
+      },
+      data: {
+        Status: 'approved',
+      },
+    });
+
+    res.json(updatedTimesheet);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+
+};
+const pendingTimesheet = async (req, res) => {
+  try {
+    const { timesheetId } = req.params;
+
+    const updatedTimesheet = await prisma.timesheet.update({
+      where: {
+        TimesheetID: parseInt(timesheetId, 10),
+      },
+      data: {
+        Status: 'pending',
+      },
+    });
+
+    res.json(updatedTimesheet);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+  
 };
 
+
+const rejectTimesheet = async (req, res) => {
+  try {
+    const { timesheetId } = req.params;
+
+    const updatedTimesheet = await prisma.timesheet.update({
+      where: {
+        TimesheetID: parseInt(timesheetId, 10),
+      },
+      data: {
+        Status: 'rejected',
+      },
+    });
+
+    res.json(updatedTimesheet);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+  
+}
+module.exports = {
+  pendingTimesheet,
+  createTimesheet,
+  getTimesheetList,
+  approveTimesheet,
+  rejectTimesheet,
+  
+};
 
 
 

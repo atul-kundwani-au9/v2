@@ -29,7 +29,7 @@ const createManagerEmployee = async (req, res) => {
           employee: { connect: { EmployeeID: employeeIdInt } },
         },
       });
-  
+      
       res.json(managerEmployee);
     } catch (error) {
       console.error(error);

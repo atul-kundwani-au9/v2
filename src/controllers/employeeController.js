@@ -94,8 +94,8 @@ const loginEmployee = async (req, res) => {
     }
    
     const token = generateToken({ id: employee.EmployeeID, email: employee.Email });
-
-    res.json({ employee, token });
+    const status = "success";
+    res.json({ employee, token, status });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
