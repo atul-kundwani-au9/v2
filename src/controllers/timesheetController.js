@@ -84,6 +84,23 @@ const getTimesheetList = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
+const getTimesheetsByEmployeeAndDateRange = async (req, res) => {
+  
+  try {
+
+    const { employeeId, startDate, endDate } = req.body;
+    const timesheets = await timesheetModel.getTimesheetsByEmployeeAndDateRange(
+      parseInt(employeeId),
+      new Date(startDate),
+      new Date(endDate)
+    );
+    res.json(timesheets);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
 const approveTimesheet = async (req, res) => {
   try {
     const { timesheetId } = req.params;
@@ -146,6 +163,7 @@ const rejectTimesheet = async (req, res) => {
   
 }
 module.exports = {
+  getTimesheetsByEmployeeAndDateRange,
   pendingTimesheet,
   createTimesheet,
   getTimesheetList,

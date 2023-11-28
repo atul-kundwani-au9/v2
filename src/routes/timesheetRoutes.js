@@ -8,5 +8,8 @@ router.put('/pendingTimesheet/:timesheetId', timesheetController.pendingTimeshee
 router.put('/rejectTimesheet/:timesheetId', timesheetController.rejectTimesheet);
 router.post('/create',authMiddleware.authenticate, timesheetController.createTimesheet);
 router.get('/list',authMiddleware.authenticate, timesheetController.getTimesheetList);
-
+router.post('/employee', timesheetController.getTimesheetsByEmployeeAndDateRange);
 module.exports = router;
+
+
+

@@ -105,15 +105,13 @@ const loginEmployee = async (req, res) => {
 
 const getEmployeeList = async (req, res) => {
   try {
-    const employees = await employeeModel.getEmployees();
-   
+    const employees = await employeeModel.getEmployees();   
     res.json(employees);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
-
 
 function generateToken(payload) {
   return jwt.sign(payload, secretKey, { expiresIn: '1h' });

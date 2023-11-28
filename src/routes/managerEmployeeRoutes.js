@@ -5,7 +5,7 @@ const managerEmployeeController = require('../controllers/managerEmployeeControl
 const authMiddleware = require('../middleware/authMiddleware');
 router.post('/createManagerEmployee',authMiddleware.authenticate, managerEmployeeController.createManagerEmployee);
 router.get('/getManagerEmployees',authMiddleware.authenticate, managerEmployeeController.getManagerEmployees);
-
+router.post('/createManagerEmployeesWithHours', managerEmployeeController.createManagerEmployeesWithHours);
 module.exports = router;
 
 

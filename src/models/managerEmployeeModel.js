@@ -18,6 +18,7 @@ const getManagerEmployees = async () => {
 };
 
 module.exports = {
+  
   createManagerEmployee,
   getManagerEmployees,
 };
