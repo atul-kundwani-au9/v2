@@ -54,7 +54,8 @@
 //   loginEmployee
 // };
 
-
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const employeeModel = require('../models/employeeModel');
@@ -117,7 +118,82 @@ function generateToken(payload) {
   return jwt.sign(payload, secretKey, { expiresIn: '1h' });
 }
 
+
+
+
+const getEmployeeProfile = async (req, res) => {
+  try {
+    const { employeeId } = req.params;
+
+    const employee = await prisma.employee.findUnique({
+      where: {
+        EmployeeID: parseInt(employeeId),
+      },
+      include: {
+        managingEmployees: {
+          select: {
+            manager: {
+              select: {
+                FirstName: true,
+                LastName: true,
+              },
+            },
+          },
+        },
+        employeesManagedBy: {
+          select: {
+            employee: {
+              select: {
+                FirstName: true,
+                LastName: true,
+              },
+            },
+          },
+        },
+        Timesheets: {
+          select: {
+            Project: {
+              select: {
+                ProjectID: true,
+                ProjectName: true,
+                
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!employee) {
+      return res.status(404).json({ error: 'Employee not found' });
+    }
+    const managerFirstName = employee.managingEmployees?.manager?.FirstName;
+    const managerLastName = employee.managingEmployees?.manager?.LastName;
+    const employeeProfile = {
+      EmployeeID: employee.EmployeeID,
+      FirstName: employee.FirstName,
+      LastName: employee.LastName,     
+      Manager: managerFirstName && managerLastName ? `${managerFirstName} ${managerLastName}` : 'Not Assigned',
+      EmployeesManaged: employee.employeesManagedBy.map((relation) => ({
+        FirstName: relation.employee?.FirstName || 'N/A',
+        LastName: relation.employee?.LastName || 'N/A',
+      })),
+      Timesheets: employee.Timesheets.map((timesheet) => ({
+        ProjectID: timesheet.Project.ProjectID,
+        ProjectName: timesheet.Project.ProjectName,
+        
+      })),
+    };
+
+    res.json(employeeProfile);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
 module.exports = {
+  getEmployeeProfile,
   registerEmployee,
   loginEmployee,
   getEmployeeList,

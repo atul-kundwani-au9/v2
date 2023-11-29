@@ -13,12 +13,36 @@ const getManagerEmployees = async () => {
     include: {
       manager: true,
       employee: true,
+      projects: true,
     },
   });
 };
-
+const getManagerById = async (managerId) => {
+  return prisma.managerEmployee.findUnique({
+    where: {
+      managerId: parseInt(managerId),
+    },
+    include: {
+      manager: {
+        select: {
+          EmployeeID: true,
+          FirstName: true,
+          LastName: true,
+        },
+      },
+      employee: {
+        select: {
+          EmployeeID: true,
+          FirstName: true,
+          LastName: true,
+        },
+      },
+      projects: true,
+    },
+  });
+};
 module.exports = {
-  
+  getManagerById,
   createManagerEmployee,
   getManagerEmployees,
 };

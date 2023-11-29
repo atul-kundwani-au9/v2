@@ -152,6 +152,73 @@ const createManagerEmployee = async (req, res) => {
 //   });
 //   return timesheets;
 // }
+
+
+
+const getManagerProfile = async (req, res) => {
+  try {
+    const { managerId } = req.params;
+
+    const manager = await prisma.employee.findUnique({
+      where: {
+        EmployeeID: parseInt(managerId),
+      },
+      include: {
+        managingEmployees: {
+          select: {
+            employee: {
+              select: {
+                FirstName: true,
+                LastName: true,
+              },
+            },
+          },
+        },
+        Timesheets: {
+          select: {
+            Project: {
+              select: {
+                ProjectID: true,
+                ProjectName: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!manager) {
+      return res.status(404).json({ error: 'Manager not found' });
+    }
+
+    const managerFirstName = manager.FirstName;
+    const managerLastName = manager.LastName;
+
+    const managerProfile = {
+      ManagerID: manager.EmployeeID,
+      FirstName: managerFirstName,
+      LastName: managerLastName,
+      Employees: manager.managingEmployees.map((relation) => ({
+        FirstName: relation.employee?.FirstName || 'N/A',
+        LastName: relation.employee?.LastName || 'N/A',
+      })),
+      Projects: manager.Timesheets.map((timesheet) => ({
+        ProjectID: timesheet.Project.ProjectID,
+        ProjectName: timesheet.Project.ProjectName,
+      })),
+    };
+
+    res.json(managerProfile);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+module.exports = {
+  getManagerProfile,
+};
+
 const createManagerEmployeesWithHours = async (req, res) => {
   try {
     const { managerId, startDate, endDate } = req.body;
@@ -177,14 +244,24 @@ const createManagerEmployeesWithHours = async (req, res) => {
       for (const emp of emps) {
         let obj = {
           emp: emp,
-        };       
-        let time_sheet = getTimesheet(emp.emp_id, startDate, endDate);        
-        
-        if (Array.isArray(time_sheet)) {
-          obj['hours'] = time_sheet.reduce((a, b) => a + b.totalHrs, 0);
-        } else {
-          obj['hours'] = 0;
-        }
+        };   
+      let timedata=[];
+      let totalHours=0;
+         getTimesheet(emp.EmployeeID, startDate, endDate).then((data)=>{
+        timedata=data;
+      
+        timedata.forEach(element => {
+         
+           totalHours = totalHours + element.HoursWorked
+           });
+         });        
+      
+        // if (Array.isArray(time_sheet)) {
+        //   obj['hours'] = time_sheet.reduce((a, b) => a + b.HoursWorked, 0);
+        // } else {
+       
+        // }
+         obj['hours'] = totalHours;
 
         list_of_timesheets.push(obj);
       }
@@ -206,7 +283,7 @@ const createManagerEmployeesWithHours = async (req, res) => {
 
 
 async function getTimesheet(employeeId, startDate, endDate) {
- 
+ console.log(employeeId, startDate, endDate)
   const timesheets = await prisma.timesheet.findMany({
     where: {
       EmployeeID: employeeId,
@@ -216,13 +293,40 @@ async function getTimesheet(employeeId, startDate, endDate) {
       },
     },
   });
+  console.log(timesheets)
   return timesheets;
 }
 
+// const getManagerProfile = async (req, res) => {
+//   try {
+//     const { managerId } = req.params;
 
+//     const managerEmployee = await managerEmployeeModel.getManagerById(managerId);
+
+//     if (!managerEmployee) {
+//       return res.status(404).json({ error: 'Manager not found' });
+//     }
+
+//     const managerProfile = {
+//       ManagerID: managerEmployee.manager.EmployeeID,
+//       ManagerFirstName: managerEmployee.manager.FirstName,
+//       ManagerLastName: managerEmployee.manager.LastName,
+//       Employees: managerEmployee.employee.map((emp) => ({
+//         EmployeeID: emp.EmployeeID,
+//         FirstName: emp.FirstName,
+//         LastName: emp.LastName,
+//       })),
+//     };
+
+//     res.json(managerProfile);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: 'Internal Server Error' });
+//   }
+// };
 module.exports = {
-  createManagerEmployeesWithHours,
- 
+  getManagerProfile,
+  createManagerEmployeesWithHours,  
   createManagerEmployee,
   getManagerEmployees,
 };

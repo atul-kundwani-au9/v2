@@ -19,8 +19,43 @@ const getEmployees = async () => {
   return prisma.employee.findMany();
 };
 
+// const getEmployeeProfileById = async (employeeId) => {
+//   return prisma.employee.findUnique({
+//     where: {
+//       EmployeeID: employeeId,
+//     },
+//     include: {
+//       managingEmployees: {
+//         include: {
+//           manager: true, 
+//         },
+//       },
+//     },
+//   });
+// };
+
+const getEmployeeProfileById = async (employeeId) => {
+  return prisma.employee.findUnique({
+    where: {
+      EmployeeID: employeeId,
+    },
+    include: {
+      managingEmployees: {
+        include: {
+          manager: true, 
+        },
+      },
+      employeesManagedBy: {
+        include: {
+          employee: true, 
+        },
+      },
+    },
+  });
+};
 module.exports = {
   createEmployee,
   getEmployeeByEmail,
   getEmployees,
+  getEmployeeProfileById
 };

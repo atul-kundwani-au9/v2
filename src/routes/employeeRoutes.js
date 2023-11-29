@@ -9,5 +9,5 @@ const authMiddleware = require('../middleware/authMiddleware');
 router.post('/register', employeeController.registerEmployee);
 router.post('/login', employeeController.loginEmployee);
 router.get('/list', authMiddleware.authenticate, employeeController.getEmployeeList);
-
+router.get('/profile/:employeeId', authMiddleware.authenticate, employeeController.getEmployeeProfile);
 module.exports = router;
