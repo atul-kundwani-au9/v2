@@ -184,10 +184,29 @@ async function getTimesheet(employeeId, startDate, endDate) {
   console.log(timesheets)
   return timesheets;
 }
+const getManagers = async (req, res) => {
+  try {
+    const managers = await prisma.employee.findMany({
+      where: {
+        EmployeeType: 'manager', 
+      },
+      select: {
+        EmployeeID: true,
+        FirstName: true,
+        LastName: true,
+      },
+    });
+
+    res.json(managers);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
 
 
 module.exports = {
-  
+  getManagers,
   getManagerProfile,
   createManagerEmployeesWithHours,  
   createManagerEmployee,

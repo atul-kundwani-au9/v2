@@ -8,6 +8,8 @@ router.get('/getManagerEmployees',authMiddleware.authenticate, managerEmployeeCo
 router.post('/createManagerEmployeesWithHours', managerEmployeeController.createManagerEmployeesWithHours);
 // router.get('/getManagerProfile/:managerId', managerEmployeeController.getManagerProfile);
 router.get('/getManagerProfile/:managerId', authMiddleware.authenticate, managerEmployeeController.getManagerProfile);
+router.get('/getManagers', authMiddleware.authenticate, managerEmployeeController.getManagers);
+
 module.exports = router;
 
 
