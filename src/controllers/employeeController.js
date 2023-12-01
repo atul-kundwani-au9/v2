@@ -1,58 +1,6 @@
 
 
 
-// const employeeModel = require('../models/employeeModel');
-
-// const registerEmployee = async (req, res) => {
-//   try {
-//     const { FirstName, LastName, Email, Password, Admin, EmployeeType } = req.body;
-//     const employee = await employeeModel.createEmployee({
-//       FirstName,
-//       LastName,
-//       Email,
-//       Password,
-//       Admin,
-//       EmployeeType,
-//     });
-//     res.json(employee);
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: 'Internal Server Error' });
-//   }
-// };
-// const loginEmployee = async (req, res) => {
-//   try {
-//     const { Email, Password } = req.body;
-
-//     // Find the user by email
-//     const employee = await employeeModel.getEmployeeByEmail(Email);
-
-//     // Check if the user exists and verify the password
-//     if (!employee || !(await bcrypt.compare(Password, employee.Password))) {
-//       return res.status(401).json({ message: 'Invalid credentials' });
-//     }
-
-//     res.json({ message: 'Login successful', employee });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: 'Internal Server Error' });
-//   }
-// };
-// const getEmployeeList = async (req, res) => {
-//   try {
-//     const employees = await employeeModel.getEmployees();
-//     res.json(employees);
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: 'Internal Server Error' });
-//   }
-// };
-
-// module.exports = {
-//   registerEmployee,
-//   getEmployeeList,
-//   loginEmployee
-// };
 
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
