@@ -1,81 +1,4 @@
 
-// const { PrismaClient } = require('@prisma/client');
-// const prisma = new PrismaClient();
-
-// const createTimesheet = async (data) => {
-//   return prisma.timesheet.create({
-//     data,
-//     Date,
-//   });
-// };
-
-// const getTimesheets = async () => {
-//   return prisma.timesheet.findMany({
-//     include: {
-//       Employee: true,
-//       Project: true,
-     
-//     },
-//   });
-// };
-
-// module.exports = {
-//   createTimesheet,
-//   getTimesheets,
-// };
-
-// const { PrismaClient } = require('@prisma/client');
-// const prisma = new PrismaClient();
-
-// const createTimesheet = async (data) => {
-//   const currentDateTime = new Date().toISOString();
-
-//   return prisma.timesheet.create({
-//     data: {
-//       ...data,
-//       Date: currentDateTime,
-//     },
-//   });
-// };
-
-// const getTimesheets = async () => {
-//   return prisma.timesheet.findMany({
-//     include: {
-//       Employee: true,
-//       Project: true,
-//     },
-//   });
-// };
-
-// module.exports = {
-//   createTimesheet,
-//   getTimesheets,
-// };
-
-// const { PrismaClient } = require('@prisma/client');
-// const prisma = new PrismaClient();
-
-// const createTimesheet = async (data) => {
-  
-//   return prisma.timesheet.create({
-//     data,
-   
-//   });
-// };
-
-// const getTimesheets = async () => {
-//   return prisma.timesheet.findMany({
-//     include: {
-//       Employee: true,
-//       Project: true,
-//     },
-//   });
-// };
-
-// module.exports = {
-//   createTimesheet,
-//   getTimesheets,
-// };
 
 
 const { PrismaClient } = require('@prisma/client');
@@ -114,7 +37,38 @@ const getTimesheetsByEmployeeAndDateRange = async (employeeId, startDate, endDat
   });
 };
 
+const getTimesheetsByManagerAndDateRange = async (managerId, startDate, endDate) => {
+  return prisma.timesheet.findMany({
+    where: {
+      Employee: {
+        managingEmployees: {
+          some: {
+            managerId: managerId,
+          },
+        },
+      },
+      Date: {
+        gte: startDate,
+        lte: endDate,
+      },
+    },
+    select: {
+      TimesheetID: true,
+      EmployeeID: true,
+      ProjectID: true,
+      Date: true,
+      Status: true,
+      HoursWorked: true,
+      Description: true,
+      Project: true,
+      Employee: true,
+    },
+  });
+};
+
+
 module.exports = {
+  getTimesheetsByManagerAndDateRange,
   createTimesheet,
   getTimesheets,
   getTimesheetsByEmployeeAndDateRange,

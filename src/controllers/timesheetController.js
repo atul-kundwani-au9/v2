@@ -98,6 +98,22 @@ const getTimesheetsByEmployeeAndDateRange = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+const getTimesheetsByManagerAndDateRange = async (req, res) => {
+  
+  try {
+
+    const { managerId, startDate, endDate } = req.body;
+    const timesheets = await timesheetModel.getTimesheetsByManagerAndDateRange(
+      parseInt(managerId),
+      new Date(startDate),
+      new Date(endDate)
+    );
+    res.json(timesheets);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
 const approveTimesheet = async (req, res) => {
   try {
     const { timesheetId } = req.params;
@@ -160,68 +176,9 @@ const rejectTimesheet = async (req, res) => {
   
 }
 
-
-// const updateTimesheetsStatus = async (timesheetIds, status) => {
-//   try {
-//     const updatedTimesheets = await prisma.timesheet.updateMany({
-//       where: {
-//         TimesheetID: {
-//           in: timesheetIds.map(id => parseInt(id, 10)),
-//         },
-//       },
-//       data: {
-//         Status: status,
-//       },
-//     });
-
-//     return updatedTimesheets;
-//   } catch (error) {
-//     console.error(error);
-//     throw new Error('Internal Server Error');
-//   }
-// };
-
-// const approveTimesheets = async (req, res) => {
-//   try {
-//     const { timesheetIds } = req.body;
-
-//     const updatedTimesheets = await updateTimesheetsStatus(timesheetIds, 'approved');
-
-//     res.json(updatedTimesheets);
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: 'Internal Server Error' });
-//   }
-// };
-
-// const pendingTimesheets = async (req, res) => {
-//   try {
-//     const { timesheetIds } = req.body;
-
-//     const updatedTimesheets = await updateTimesheetsStatus(timesheetIds, 'pending');
-
-//     res.json(updatedTimesheets);
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: 'Internal Server Error' });
-//   }
-// };
-
-// const rejectTimesheets = async (req, res) => {
-//   try {
-//     const { timesheetIds } = req.body;
-
-//     const updatedTimesheets = await updateTimesheetsStatus(timesheetIds, 'rejected');
-
-//     res.json(updatedTimesheets);
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: 'Internal Server Error' });
-//   }
-// };
 const getEmployeesUnderManagerOnSameProject = async (req, res) => {
   try {
-    const { managerId, employeeId, projectId, startDate, endDate } = req.body;    
+    const { managerId, employeeId, projectId, startDate, endDate,clientId } = req.body;
     const managerExists = await prisma.employee.findUnique({
       where: { EmployeeID: managerId },
     });
@@ -233,7 +190,7 @@ const getEmployeesUnderManagerOnSameProject = async (req, res) => {
     if (!managerExists || !employeeExists) {
       return res.status(404).json({ error: 'Manager or Employee not found' });
     }
-    
+
     const employeesList = await prisma.managerEmployee.findMany({
       where: {
         managerId: managerId,
@@ -241,16 +198,14 @@ const getEmployeesUnderManagerOnSameProject = async (req, res) => {
       include: {
         manager: true,
         employee: {
-          where: {
-            EmployeeID: { not: employeeId }, 
-          },
+          
           include: {
-            timesheets: {
+            Timesheets: {
               where: {
                 ProjectID: projectId,
                 Date: {
-                  gte: startDate,
-                  lte: endDate,
+                  gte: new Date(startDate),
+                  lte: new Date(endDate),
                 },
               },
             },
@@ -258,8 +213,9 @@ const getEmployeesUnderManagerOnSameProject = async (req, res) => {
         },
       },
     });
+
     const result = employeesList.map((relation) => {
-      const totalHours = (relation.employee?.timesheets || []).reduce(
+      const totalHours = (relation.employee?.Timesheets || []).reduce(
         (total, timesheet) => total + timesheet.HoursWorked,
         0
       );
@@ -268,6 +224,7 @@ const getEmployeesUnderManagerOnSameProject = async (req, res) => {
         manager: relation.manager,
         employee: relation.employee,
         totalHours: totalHours,
+        clientId: clientId, 
       };
     });
 
@@ -279,6 +236,7 @@ const getEmployeesUnderManagerOnSameProject = async (req, res) => {
 };
 
 module.exports = {
+  getTimesheetsByManagerAndDateRange,
   getEmployeesUnderManagerOnSameProject,
   getTimesheetsByEmployeeAndDateRange,
   pendingTimesheet,

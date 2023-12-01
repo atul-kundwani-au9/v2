@@ -127,65 +127,40 @@ const createManagerEmployeesWithHours = async (req, res) => {
         employee: true,
       },
     });
-
-    const managerEmployeesWithHours = managerEmployees.map((relation) => {
-      const totalHours = (relation.employee?.timesheets || []).reduce(
-        (total, timesheet) => total + timesheet.HoursWorked,
-        0
-      );
-      
+    // 
+    const managerEmployeesWithHours = await Promise.all(managerEmployees.map(async (relation) => {
       const emps = Array.isArray(relation.employee) ? relation.employee : [relation.employee];
       const list_of_timesheets = [];
-      // for (const emp of emps) {
-      //   let obj = {
-      //     emp: emp,
-      //   };   
-      // let timedata=[];
-      // let totalHours=0;
-      //    getTimesheet(emp.EmployeeID, startDate, endDate).then((data)=>{
-      //   timedata=data;
-      
-      //   timedata.forEach(element => {
-         
-      //      totalHours = totalHours + element.HoursWorked
-      //      });
-      //    });        
-      
-      //   // if (Array.isArray(time_sheet)) {
-      //   //   obj['hours'] = time_sheet.reduce((a, b) => a + b.HoursWorked, 0);
-      //   // } else {
-       
-      //   // }
-      //    obj['hours'] = totalHours;
-
-      //   list_of_timesheets.push(obj);
-      // }
+    
       for (const emp of emps) {
         let obj = {
           emp: emp,
         };
         let timedata = [];
-        
-        let totalHours = 0;
-        const timeData = getTimesheet(emp.EmployeeID, startDate, endDate).then((data) => {
+    
+        try {
+          const data = await getTimesheet(emp.EmployeeID, startDate, endDate);
           timedata = data;
+    
           timedata.forEach(element => {
-            totalHours += element.HoursWorked || 0
+            obj['hours'] = (obj['hours'] || 0) + (element.HoursWorked || 0);
           });
-        }).finally(()=>{
-        
-        
-          obj['hours'] = totalHours;
-        })
-        list_of_timesheets.push(obj);
+    
+          list_of_timesheets.push(obj);
+        } catch (error) {
+          console.error(`Error fetching timesheet for EmployeeID ${emp.EmployeeID}:`, error);
+        }
       }
-      return {
-        manager: relation.manager,
-        employee: relation.employee,
-        totalHours: totalHours,
-        employeeDetails: list_of_timesheets,
-      };
-    });
+    
+      return list_of_timesheets;
+    }));
+    //   return {
+    //     manager: relation.manager,
+    //     employee: relation.employee,
+    //     totalHours: totalHours,
+    //     employeeDetails: list_of_timesheets,
+    //   };
+    // });
 
     res.json(managerEmployeesWithHours);
   } catch (error) {
@@ -201,8 +176,8 @@ async function getTimesheet(employeeId, startDate, endDate) {
     where: {
       EmployeeID: employeeId,
       Date: {
-        gte: startDate,
-        lte: endDate,
+        gte: new Date(startDate) ,
+        lte: new Date(endDate),
       },
     },
   });
@@ -212,6 +187,7 @@ async function getTimesheet(employeeId, startDate, endDate) {
 
 
 module.exports = {
+  
   getManagerProfile,
   createManagerEmployeesWithHours,  
   createManagerEmployee,
