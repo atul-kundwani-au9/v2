@@ -154,13 +154,7 @@ const createManagerEmployeesWithHours = async (req, res) => {
     
       return list_of_timesheets;
     }));
-    //   return {
-    //     manager: relation.manager,
-    //     employee: relation.employee,
-    //     totalHours: totalHours,
-    //     employeeDetails: list_of_timesheets,
-    //   };
-    // });
+    
 
     res.json(managerEmployeesWithHours);
   } catch (error) {

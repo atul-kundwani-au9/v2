@@ -3,36 +3,50 @@ const { PrismaClient } = require('@prisma/client');
 const timesheetModel = require('../models/timesheetModel');
 const prisma = new PrismaClient();
 
-const createTimesheet = async (req, res) => {
-  console.log(req.body)
-  try {
-    const { EmployeeID, ProjectID, entryDate,Status,Description, HoursWorked } = req.body;
 
-    console.log('entryDate:', entryDate);
-    const existingEmployee = await prisma.employee.findUnique({
-      where: {
-        EmployeeID: EmployeeID,
-        
-      },
-    });
+const createTimesheets = async (req, res) => {
+  try {
+    const timesheetEntries = req.body.timesheets; 
+
+    const results = await Promise.all(
+      timesheetEntries.map(async (entry) => {
+        const { EmployeeID, ProjectID, entryDate, Status, Description, HoursWorked, EntryType } = entry;
+
+        const existingEmployee = await prisma.employee.findUnique({
+          where: {
+            EmployeeID: EmployeeID,
+          },
+        });
+
+        if (!existingEmployee) {
+          return { error: `Employee with ID ${EmployeeID} not found` };
+        }
+        const date = new Date(entryDate);
      
-    if (!existingEmployee) {
-      return res.status(404).json({ error: 'Employee not found' });    }          
-    const timesheetData = {
-      EmployeeID,
-      ProjectID,
-      Date:TempDate,      
-      Status,
-      HoursWorked,
-      Description,
-    };    
-    const timesheet = await timesheetModel.createTimesheet(timesheetData);
-    res.json(timesheet);
+        if (EntryType === 'weekly') {       
+        } else if (EntryType === 'monthly') {         
+        }
+        const timesheetData = {
+          EmployeeID,
+          ProjectID,
+          Date: date,
+          Status,
+          HoursWorked,
+          Description,
+        };
+
+        const timesheet = await timesheetModel.createTimesheet(timesheetData);
+        return timesheet;
+      })
+    );
+    
+    res.json(results);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
 
 const getAllTimesheetdata = async (req, res) => {
   try {
@@ -41,8 +55,7 @@ const getAllTimesheetdata = async (req, res) => {
       where: {
         EmployeeID: EmployeeID,
       },
-    });
-     
+    });     
     if (!existingEmployee) {
       return res.status(404).json({ error: 'Employee not found' });
     }     
@@ -98,10 +111,8 @@ const getTimesheetsByEmployeeAndDateRange = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
-const getTimesheetsByManagerAndDateRange = async (req, res) => {
-  
+const getTimesheetsByManagerAndDateRange = async (req, res) => {  
   try {
-
     const { managerId, startDate, endDate } = req.body;
     const timesheets = await timesheetModel.getTimesheetsByManagerAndDateRange(
       parseInt(managerId),
@@ -235,16 +246,12 @@ const getEmployeesUnderManagerOnSameProject = async (req, res) => {
   }
 };
 
-
-
-
-module.exports = {
-  
+module.exports = {  
   getTimesheetsByManagerAndDateRange,
   getEmployeesUnderManagerOnSameProject,
   getTimesheetsByEmployeeAndDateRange,
   pendingTimesheet,
-  createTimesheet,
+  createTimesheets,
   getTimesheetList,
   approveTimesheet,
   rejectTimesheet,

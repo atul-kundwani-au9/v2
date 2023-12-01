@@ -8,7 +8,6 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const employeeModel = require('../models/employeeModel');
 const { secretKey } = require('../config/config');
-// const { generateToken, verifyToken } = require('./jwt');
 const registerEmployee = async (req, res) => {
   try {
    
@@ -107,6 +106,7 @@ const getEmployeeProfile = async (req, res) => {
                 
               },
             },
+            HoursWorked: true,
           },
         },
       },
@@ -129,6 +129,7 @@ const getEmployeeProfile = async (req, res) => {
       Timesheets: employee.Timesheets.map((timesheet) => ({
         ProjectID: timesheet.Project.ProjectID,
         ProjectName: timesheet.Project.ProjectName,
+        HoursWorked: timesheet.HoursWorked || 0,
         
       })),
     };
