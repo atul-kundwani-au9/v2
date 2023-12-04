@@ -17,11 +17,13 @@ model Employee {
   Password       String
   Admin          Boolean
   EmployeeType   String   // Assuming "regular" or "manager"
-
+   clientId       Int?     // Nullable field if applicable
   // Default Values
   DefaultHours    Float    @default(8)                 
   DefaultProject  String   @default("")  
   DefaultClient   String   @default("")   
+// Derived field for full name
+  name            String   @map("concat(FirstName, ' ', LastName)")
 
   // Relationships
   Timesheets         Timesheet[]

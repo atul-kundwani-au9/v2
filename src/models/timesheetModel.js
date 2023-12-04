@@ -10,10 +10,6 @@ const createTimesheet = async (data) => {
   });
 };
 
-
-
-
-
 const getTimesheets = async () => {
   return prisma.timesheet.findMany({
     include: {

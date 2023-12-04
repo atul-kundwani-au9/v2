@@ -1,6 +1,7 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
-
+const createCsvWriter = require('csv-writer').createObjectCsvWriter;
+const fs = require('fs').promises;
 const createManagerEmployee = async (req, res) => {
     try {
       const { managerId, employeeId } = req.body;
@@ -111,9 +112,6 @@ const getManagerProfile = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
-
-
-
 const createManagerEmployeesWithHours = async (req, res) => {
   try {
     const { managerId, startDate, endDate } = req.body;
@@ -127,7 +125,7 @@ const createManagerEmployeesWithHours = async (req, res) => {
         employee: true,
       },
     });
-    // 
+    
     const managerEmployeesWithHours = await Promise.all(managerEmployees.map(async (relation) => {
       const emps = Array.isArray(relation.employee) ? relation.employee : [relation.employee];
       const list_of_timesheets = [];
@@ -155,7 +153,6 @@ const createManagerEmployeesWithHours = async (req, res) => {
       return list_of_timesheets;
     }));
     
-
     res.json(managerEmployeesWithHours);
   } catch (error) {
     console.error(error);
@@ -199,7 +196,129 @@ const getManagers = async (req, res) => {
 };
 
 
+
+
+const exportCSV = async (req, res) => {
+  try {
+    const { managerId, startDate, endDate } = req.body;
+    const jsonData = await generateCSVData(managerId, startDate, endDate);
+    const currentDate = new Date().toLocaleDateString('en-IN');
+    const formattedDate = currentDate.replace(/\//g, '-');
+    const fileName = `exported-data-${formattedDate}.csv`;
+    const filePath = `public/${fileName}`;
+    
+    const csvWriter = createCsvWriter({
+      path: filePath,
+      header: [
+        { id: 'Manager Name', title: 'Manager Name' },
+        { id: 'Employee Name', title: 'Employee Name' },
+        { id: 'Total Hours Worked', title: 'Total Hours Worked' },
+        { id: 'Client ID', title: 'Client ID' },
+      ],
+    });
+    
+    await csvWriter.writeRecords(jsonData);
+    
+    res.download(filePath, fileName);
+    res.status(200).json(jsonData);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+const generateCSVData = async (managerId, startDate, endDate) => {
+  const managerEmployeesWithHours = await prisma.managerEmployee.findMany({
+    where: {
+      managerId: parseInt(managerId),
+    },
+    include: {
+      manager: {
+        select: {
+          FirstName: true,
+          LastName:true,
+        },
+      },
+      employee: {
+        select: {
+          FirstName: true,
+          LastName:true,
+          clientId: true,          
+          
+        },
+      },
+    },
+  });
+  const csvDataPromises = managerEmployeesWithHours.map(async (relation) => {   
+    
+    const managerName = relation.manager ? relation.manager.FirstName + ' ' + relation.manager.LastName : 'N/A';   
+    const employeeName = relation.employee ? relation.employee.FirstName + ' ' + relation.employee.LastName: 'N/A';
+    const totalHours = await calculateTotalHours(relation.employee, startDate, endDate);
+    const totalClientHours = await calculateTotalClient(relation.employee, startDate, endDate);   
+    const clientId = relation.employee && relation.employee.clientId !== null ? relation.employee.clientId : 'N/A';
+
+    return {
+      'Manager Name': managerName,
+      'Employee Name': employeeName,
+      'Total Hours Worked': totalHours,
+      'Client ID': clientId,
+      'Total Client Hours': totalClientHours,
+    };
+  });
+
+  
+  const csvData = await Promise.all(csvDataPromises);
+  console.log(csvData);
+
+  return csvData;
+};
+const calculateTotalHours = async (employee, startDate, endDate) => {
+    const timesheets = await prisma.timesheet.findMany({
+      where: {
+        EmployeeID: employee.EmployeeID,
+        Date: {
+          gte: new Date(startDate),
+          lte: new Date(endDate),
+        },
+      },
+    });
+  
+    const totalHours = timesheets.reduce((total, timesheet) => total + timesheet.HoursWorked, 0);
+  
+    return totalHours;
+  };
+
+
+
+const calculateTotalClient = async (employee, startDate, endDate) => {
+  const timesheets = await prisma.timesheet.findMany({
+    where: {
+      EmployeeID: employee.EmployeeID,
+      Date: {
+        gte: new Date(startDate),
+        lte: new Date(endDate),
+      },
+    },
+  });
+
+  let data_client = {};
+  timesheets.forEach((row) => {
+    const clientId = row.clientId;
+    const hoursWorked = row.hours;    
+    if (clientId !== undefined) {
+      if (!data_client[clientId]) {
+        data_client[clientId] = 0;
+      }
+
+      data_client[clientId] += hoursWorked;
+    }
+  });
+
+  return data_client;
+};
+
 module.exports = {
+  exportCSV,
   getManagers,
   getManagerProfile,
   createManagerEmployeesWithHours,  

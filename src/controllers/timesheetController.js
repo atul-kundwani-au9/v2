@@ -2,8 +2,10 @@
 const { PrismaClient } = require('@prisma/client');
 const timesheetModel = require('../models/timesheetModel');
 const prisma = new PrismaClient();
-
-
+// const createCsvWriter = require('csv-writer').createObjectCsvWriter;
+const express = require('express');
+const router = require('../routes/timesheetRoutes');
+const app = express();
 const createTimesheets = async (req, res) => {
   try {
     const timesheetEntries = req.body.timesheets; 
@@ -127,7 +129,9 @@ const getTimesheetsByManagerAndDateRange = async (req, res) => {
 };
 const approveTimesheet = async (req, res) => {
   try {
-    const { timesheetId } = req.params;
+    const { timesheetId } = req.params; 
+
+    // employee id, date range
 
     const updatedTimesheet = await prisma.timesheet.update({
       where: {
@@ -186,7 +190,6 @@ const rejectTimesheet = async (req, res) => {
   }
   
 }
-
 const getEmployeesUnderManagerOnSameProject = async (req, res) => {
   try {
     const { managerId, employeeId, projectId, startDate, endDate,clientId } = req.body;
@@ -246,7 +249,99 @@ const getEmployeesUnderManagerOnSameProject = async (req, res) => {
   }
 };
 
-module.exports = {  
+// const createManagerEmployeesWithHours = async (req, res) => {
+//   try {
+//     const { managerId, startDate, endDate } = req.body;
+
+//     const managerEmployees = await prisma.managerEmployee.findMany({
+//       where: {
+//         managerId: parseInt(managerId),
+//       },
+//       include: {
+//         manager: true,
+//         employee: true,
+//       },
+//     });
+//     // 
+//     const managerEmployeesWithHours = await Promise.all(managerEmployees.map(async (relation) => {
+//       const emps = Array.isArray(relation.employee) ? relation.employee : [relation.employee];
+//       const list_of_timesheets = [];
+    
+//       for (const emp of emps) {
+//         let obj = {
+//           emp: emp,
+//         };
+//         let timedata = [];
+    
+//         try {
+//           const data = await getTimesheet(emp.EmployeeID, startDate, endDate);
+//           timedata = data;
+    
+//           timedata.forEach(element => {
+//             obj['hours'] = (obj['hours'] || 0) + (element.HoursWorked || 0);
+//           });
+    
+//           list_of_timesheets.push(obj);
+//         } catch (error) {
+//           console.error(`Error fetching timesheet for EmployeeID ${emp.EmployeeID}:`, error);
+//         }
+//       }
+    
+//       return list_of_timesheets;
+//     }));
+    
+
+//     res.json(managerEmployeesWithHours);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: 'Internal Server Error' });
+//   }
+// };
+
+
+// async function getTimesheet(employeeId, startDate, endDate) {
+//  console.log(employeeId, startDate, endDate)
+//   const timesheets = await prisma.timesheet.findMany({
+//     where: {
+//       EmployeeID: employeeId,
+//       Date: {
+//         gte: new Date(startDate) ,
+//         lte: new Date(endDate),
+//       },
+//     },
+//   });
+//   console.log(timesheets)
+//   return timesheets;
+// }
+// const csvdata = async (req,res)=> {
+// // app.get('/export-csv', async (req, res) => {
+//   try {    
+//     const employeesData = await getEmployeesUnderManagerOnSameProject(req, res);
+//     // const managerEmployeesWithHoursData = await createManagerEmployeesWithHours(req, res);   
+//     const combinedData = [...employeesData];
+    
+//     const csvWriter = createCsvWriter({
+//       path: 'output.csv',
+//       header: [
+//         { id: 'manager.name', title: 'Manager Name' },
+//         { id: 'employee.name', title: 'Employee Name' },
+//         { id: 'totalHours', title: 'Total Hours Worked' },
+//         { id: 'clientId', title: 'Client ID' },
+//       ],
+//     });
+   
+//     csvWriter.writeRecords(combinedData).then(() => {
+//       console.log('CSV file has been written successfully');
+//       res.download('output.csv'); 
+//     });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: 'Internal Server Error' });
+//   }
+
+// }
+
+module.exports = {    
   getTimesheetsByManagerAndDateRange,
   getEmployeesUnderManagerOnSameProject,
   getTimesheetsByEmployeeAndDateRange,
