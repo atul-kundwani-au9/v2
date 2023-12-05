@@ -10,6 +10,7 @@ router.post('/createManagerEmployeesWithHours', managerEmployeeController.create
 router.get('/getManagerProfile/:managerId', authMiddleware.authenticate, managerEmployeeController.getManagerProfile);
 router.get('/getManagers', authMiddleware.authenticate, managerEmployeeController.getManagers);
 router.post('/csv-data', authMiddleware.authenticate, managerEmployeeController.exportCSV);
+router.get('/managerData/:managerId', authMiddleware.authenticate, managerEmployeeController.getManagerData);
 module.exports = router;
 
 

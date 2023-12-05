@@ -49,7 +49,6 @@ const createTimesheets = async (req, res) => {
   }
 };
 
-
 const getAllTimesheetdata = async (req, res) => {
   try {
     const { EmployeeID, startDate, endDate } = req.body;   
@@ -127,21 +126,22 @@ const getTimesheetsByManagerAndDateRange = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
-const approveTimesheet = async (req, res) => {
-  try {
-    const { timesheetId } = req.params; 
-
-    // employee id, date range
-
-    const updatedTimesheet = await prisma.timesheet.update({
-      where: {
-        TimesheetID: parseInt(timesheetId, 10),
+const approveTimesheet = async(req, res) => {
+  try {   
+    const { employeeId, startDate, endDate } = req.params;      
+    const updatedTimesheet = await prisma.timesheet.update({      
+      where: {      
+        // TimesheetID: parseInt(timesheetId, 10),
+        EmployeeID: employeeId,
+                Date: {
+                  gte:startDate,
+                  lte: endDate,
+                }
       },
       data: {
         Status: 'approved',
       },
     });
-
     res.json(updatedTimesheet);
   } catch (error) {
     console.error(error);
@@ -151,11 +151,17 @@ const approveTimesheet = async (req, res) => {
 };
 const pendingTimesheet = async (req, res) => {
   try {
-    const { timesheetId } = req.params;
+    const { employeeId, startDate, endDate} = req.params;
 
     const updatedTimesheet = await prisma.timesheet.update({
       where: {
-        TimesheetID: parseInt(timesheetId, 10),
+          // TimesheetID: parseInt(timesheetId, 10),
+        EmployeeID: employeeId,
+        Date: {
+          gte:startDate,
+          lte: endDate,
+        }
+      
       },
       data: {
         Status: 'pending',
@@ -172,11 +178,16 @@ const pendingTimesheet = async (req, res) => {
 
 const rejectTimesheet = async (req, res) => {
   try {
-    const { timesheetId } = req.params;
+    const { employeeId, startDate, endDate} = req.params;
 
     const updatedTimesheet = await prisma.timesheet.update({
       where: {
-        TimesheetID: parseInt(timesheetId, 10),
+        // TimesheetID: parseInt(timesheetId, 10),
+        EmployeeID: employeeId,
+        Date: {
+          gte: startDate,
+          lte: endDate,
+        }
       },
       data: {
         Status: 'rejected',

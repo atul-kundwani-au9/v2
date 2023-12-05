@@ -42,9 +42,8 @@ const getManagerById = async (managerId) => {
   });
 };
 
-
 module.exports = {
-  
+ 
   getManagerById,
   createManagerEmployee,
   getManagerEmployees,
