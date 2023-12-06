@@ -322,6 +322,59 @@ const getEmployeesUnderManagerOnSameProject = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+// const getEmployeesUnderManagerOnSameProject = async (req, res) => {
+//   try {
+//     const { managerId, projectId, startDate, endDate, clientId } = req.body;
+//     const managerExists = await prisma.employee.findUnique({
+//       where: { EmployeeID: managerId },
+//     });
+
+//     if (!managerExists) {
+//       return res.status(404).json({ error: 'Manager not found' });
+//     }
+
+//     const employeesList = await prisma.managerEmployee.findMany({
+//       where: {
+//         managerId: managerId,
+//       },
+//       include: {
+//         manager: true,
+//         employee: {
+//           include: {
+//             Timesheets: {
+//               where: {
+//                 ProjectID: projectId,
+//                 Date: {
+//                   gte: new Date(startDate),
+//                   lte: new Date(endDate),
+//                 },
+//               },
+//             },
+//           },
+//         },
+//       },
+//     });
+
+//     const result = employeesList.map((relation) => {
+//       const totalHours = (relation.employee?.Timesheets || []).reduce(
+//         (total, timesheet) => total + timesheet.HoursWorked,
+//         0
+//       );
+
+//       return {
+//         manager: relation.manager,
+//         employee: relation.employee,
+//         totalHours: totalHours,
+//         clientId: clientId,
+//       };
+//     });
+
+//     res.json(result);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: 'Internal Server Error' });
+//   }
+// };
 
 
 

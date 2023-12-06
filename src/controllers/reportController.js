@@ -65,11 +65,177 @@ const getEmployeeReport = async (req, res) => {
 };
 
 
+// const getManagerReport = async (req, res) => {
+//   try {
+//     const { managerId, startDate, endDate } = req.body;
+//     const managedEmployees = await prisma.managerEmployee.findMany({
+//       where: {
+//         managerId: parseInt(managerId),
+//       },
+//       select: {
+//         employeeId: true,
+//       },
+//     });
+
+//     const managedEmployeeIds = managedEmployees.map((entry) => entry.employeeId);
+    
+//     const submittedTimesheets = await prisma.timesheet.findMany({
+//       where: {
+//         EmployeeID: {
+//           in: managedEmployeeIds,
+//         },
+//         Date: {
+//           gte: new Date(startDate),
+//           lte: new Date(endDate),
+//         },
+//         Status: 'submitted',
+//       },
+//       distinct: ['EmployeeID'],
+//     });
+    
+//     const submittedEmployeeIds = submittedTimesheets.map((timesheet) => timesheet.EmployeeID);
+//     const submittedEmployees = await prisma.employee.findMany({
+//       where: {
+//         EmployeeID: {
+//           in: submittedEmployeeIds,
+//         },
+//       },
+//     });
+   
+//     const updatedSubmittedTimesheets = await prisma.timesheet.findMany({
+//       where: {
+//         EmployeeID: {
+//           in: managedEmployeeIds,
+//         },
+//         Date: {
+//           gte: new Date(startDate),
+//           lte: new Date(endDate),
+//         },
+//         Status: 'submitted',
+//       },
+//       distinct: ['EmployeeID'],
+//     });
+    
+//     const updatedSubmittedEmployeeIds = updatedSubmittedTimesheets.map((timesheet) => timesheet.EmployeeID);
+//     const updatedSubmittedEmployees = await prisma.employee.findMany({
+//       where: {
+//         EmployeeID: {
+//           in: updatedSubmittedEmployeeIds,
+//         },
+//       },
+//     });
+
+//     const notSubmittedEmployees = await prisma.employee.findMany({
+//       where: {
+//         EmployeeID: {
+//           in: managedEmployeeIds,
+//           notIn: updatedSubmittedEmployeeIds,
+//         },
+//       },
+//     });
+
+//     const response = {
+//       submittedEmployees: updatedSubmittedEmployees,
+//       notSubmittedEmployees: notSubmittedEmployees,
+//       totalSubmitted: updatedSubmittedEmployees.length,
+//       totalNotSubmitted: notSubmittedEmployees.length,
+//       status: 'success',
+//     };
+
+//     res.json(response);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: 'Internal Server Error' });
+//   }
+// };
+// const getManagerReport = async (req, res) => {
+//   try {
+//     const { managerId, startDate, endDate } = req.body;
+
+//     const managedEmployees = await prisma.managerEmployee.findMany({
+//       where: {
+//         managerId: parseInt(managerId),
+//       },
+//       select: {
+//         employeeId: true,
+//       },
+//     });
+
+//     const managedEmployeeIds = managedEmployees.map((entry) => entry.employeeId);    
+//     const submittedTimesheets = await prisma.timesheet.findMany({
+//       where: {
+//         EmployeeID: {
+//           in: managedEmployeeIds,
+//         },
+//         Date: {
+//           gte: new Date(startDate),
+//           lte: new Date(endDate),
+//         },
+//         Status: 'submitted',
+//       },
+//       distinct: ['EmployeeID'],
+//     });
+
+   
+//     const submittedEmployeeIds = submittedTimesheets.map((timesheet) => timesheet.EmployeeID);
+//     const submittedEmployees = await prisma.employee.findMany({
+//       where: {
+//         EmployeeID: {
+//           in: submittedEmployeeIds,
+//         },
+//       },
+//     });
+    
+//     const updatedSubmittedTimesheets = await prisma.timesheet.findMany({
+//       where: {
+//         EmployeeID: {
+//           in: managedEmployeeIds,
+//         },
+//         Date: {
+//           gte: new Date(startDate),
+//           lte: new Date(endDate),
+//         },
+//         Status: 'submitted',
+//       },
+//       distinct: ['EmployeeID'],
+//     });
+  
+//     const updatedSubmittedEmployeeIds = updatedSubmittedTimesheets.map((timesheet) => timesheet.EmployeeID);
+//     const updatedSubmittedEmployees = await prisma.employee.findMany({
+//       where: {
+//         EmployeeID: {
+//           in: updatedSubmittedEmployeeIds,
+//         },
+//       },
+//     });
+
+//     const notSubmittedEmployees = await prisma.employee.findMany({
+//       where: {
+//         EmployeeID: {
+//           in: managedEmployeeIds,
+//           notIn: updatedSubmittedEmployeeIds,
+//         },
+//       },
+//     });
+
+//     const response = {
+//       submittedEmployees: updatedSubmittedEmployees,
+//       notSubmittedEmployees: notSubmittedEmployees,
+//       totalSubmitted: updatedSubmittedTimesheets.length, // Use the correct count
+//       totalNotSubmitted: notSubmittedEmployees.length,
+//       status: 'success',
+//     };
+
+//     res.json(response);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: 'Internal Server Error' });
+//   }
+// };
 const getManagerReport = async (req, res) => {
   try {
     const { managerId, startDate, endDate } = req.body;
 
-    
     const managedEmployees = await prisma.managerEmployee.findMany({
       where: {
         managerId: parseInt(managerId),
@@ -78,9 +244,9 @@ const getManagerReport = async (req, res) => {
         employeeId: true,
       },
     });
-    
+
     const managedEmployeeIds = managedEmployees.map((entry) => entry.employeeId);
-    
+    console.log('Managed Employee IDs:', managedEmployeeIds);
     const submittedTimesheets = await prisma.timesheet.findMany({
       where: {
         EmployeeID: {
@@ -92,9 +258,8 @@ const getManagerReport = async (req, res) => {
         },
         Status: 'submitted',
       },
-      distinct: ['EmployeeID'], 
     });
-
+    console.log('Submitted Timesheets:', submittedTimesheets);
     const allEmployees = await prisma.employee.findMany();
 
     const submittedEmployeeIds = submittedTimesheets.map((timesheet) => timesheet.EmployeeID);
@@ -110,7 +275,7 @@ const getManagerReport = async (req, res) => {
     const response = {
       submittedEmployees: submittedEmployees,
       notSubmittedEmployees: notSubmittedEmployees,
-      totalSubmitted: submittedEmployees.length,
+      totalSubmitted: submittedTimesheets.length, 
       totalNotSubmitted: notSubmittedEmployees.length,
       status: 'success',
     };
@@ -121,7 +286,6 @@ const getManagerReport = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
-
 
 module.exports = {
   getManagerReport,

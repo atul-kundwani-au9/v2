@@ -13,7 +13,7 @@ router.post('/manager', timesheetController.getTimesheetsByManagerAndDateRange )
 router.post('/getEmployeesUnderManagerOnSameProject', authMiddleware.authenticate, timesheetController.getEmployeesUnderManagerOnSameProject);
 router.post('/getAllTimesheetdata',authMiddleware.authenticate, timesheetController.getAllTimesheetdata)
 
-// router.post('/export-csv',authMiddleware.authenticate,timesheetController.csvdata)
+
 module.exports = router;
 
 
