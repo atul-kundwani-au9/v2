@@ -6,10 +6,13 @@ const prisma = new PrismaClient();
 const express = require('express');
 const router = require('../routes/timesheetRoutes');
 const app = express();
+
 const createTimesheets = async (req, res) => {
   try {
     const timesheetEntries = req.body.timesheets; 
-
+    if (!timesheetEntries || !Array.isArray(timesheetEntries)) {
+      return res.status(400).json({ error: 'Invalid timesheetEntries in the request body' });
+    }
     const results = await Promise.all(
       timesheetEntries.map(async (entry) => {
         const { EmployeeID, ProjectID, entryDate, Status, Description, HoursWorked, EntryType } = entry;
@@ -41,13 +44,26 @@ const createTimesheets = async (req, res) => {
         return timesheet;
       })
     );
-    
+//     const timesheet = await prisma.timesheet.upsert({
+//       where: {
+//         EmployeeID: EmployeeID,
+//         ProjectID: ProjectID,
+//         Date: date,
+//       },
+//       update: timesheetData,
+//       create: timesheetData,
+//     });
+
+//     return timesheet;
+//   })
+// );
     res.json(results);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
 
 const getAllTimesheetdata = async (req, res) => {
   try {
@@ -126,36 +142,59 @@ const getTimesheetsByManagerAndDateRange = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
-const approveTimesheet = async(req, res) => {
-  try {   
-    const { employeeId, startDate, endDate } = req.params;      
-    const updatedTimesheet = await prisma.timesheet.update({      
-      where: {      
-        // TimesheetID: parseInt(timesheetId, 10),
+
+const approveTimesheet = async (req, res) => {
+  try {
+    const { employeeId, startDate, endDate } = req.body;
+
+    
+    const isValidDateFormat = (dateString) => {
+      const regex = /^\d{4}-\d{2}-\d{2}$/;
+      return regex.test(dateString);
+    };
+
+    if (!isValidDateFormat(startDate) || !isValidDateFormat(endDate)) {
+      return res.status(400).json({ error: 'Invalid date format for startDate or endDate' });
+    }
+    
+    const updateResult = await prisma.timesheet.updateMany({
+      where: {
         EmployeeID: employeeId,
-                Date: {
-                  gte:startDate,
-                  lte: endDate,
-                }
+        Date: {
+          gte: new Date(startDate),
+          lte: new Date(endDate),
+        },
       },
       data: {
         Status: 'approved',
       },
     });
-    res.json(updatedTimesheet);
+
+    // Fetch the updated timesheets
+    const updatedTimesheets = await prisma.timesheet.findMany({
+      where: {
+        EmployeeID: employeeId,
+        Date: {
+          gte: new Date(startDate),
+          lte: new Date(endDate),
+        },
+      },
+    });    
+    const approvedTimesheets = updatedTimesheets.filter((timesheet) => timesheet.Status === 'approved');
+    res.json(approvedTimesheets);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
-
 };
+
 const pendingTimesheet = async (req, res) => {
   try {
     const { employeeId, startDate, endDate} = req.params;
 
     const updatedTimesheet = await prisma.timesheet.update({
       where: {
-          // TimesheetID: parseInt(timesheetId, 10),
+        
         EmployeeID: employeeId,
         Date: {
           gte:startDate,
@@ -176,31 +215,55 @@ const pendingTimesheet = async (req, res) => {
   
 };
 
+
 const rejectTimesheet = async (req, res) => {
   try {
-    const { employeeId, startDate, endDate} = req.params;
+    const { employeeId, startDate, endDate } = req.body;
 
-    const updatedTimesheet = await prisma.timesheet.update({
+   
+    const isValidDateFormat = (dateString) => {
+      const regex = /^\d{4}-\d{2}-\d{2}$/;
+      return regex.test(dateString);
+    };
+
+    if (!isValidDateFormat(startDate) || !isValidDateFormat(endDate)) {
+      return res.status(400).json({ error: 'Invalid date format for startDate or endDate' });
+    }
+
+   
+    const updateResult = await prisma.timesheet.updateMany({
       where: {
-        // TimesheetID: parseInt(timesheetId, 10),
         EmployeeID: employeeId,
         Date: {
-          gte: startDate,
-          lte: endDate,
-        }
+          gte: new Date(startDate),
+          lte: new Date(endDate),
+        },
       },
       data: {
         Status: 'rejected',
       },
     });
 
-    res.json(updatedTimesheet);
+   
+    const updatedTimesheets = await prisma.timesheet.findMany({
+      where: {
+        EmployeeID: employeeId,
+        Date: {
+          gte: new Date(startDate),
+          lte: new Date(endDate),
+        },
+        Status: 'rejected',
+      },
+    });
+
+   
+    res.json(updatedTimesheets);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
-  
-}
+};
+
 const getEmployeesUnderManagerOnSameProject = async (req, res) => {
   try {
     const { managerId, employeeId, projectId, startDate, endDate,clientId } = req.body;
@@ -260,97 +323,7 @@ const getEmployeesUnderManagerOnSameProject = async (req, res) => {
   }
 };
 
-// const createManagerEmployeesWithHours = async (req, res) => {
-//   try {
-//     const { managerId, startDate, endDate } = req.body;
 
-//     const managerEmployees = await prisma.managerEmployee.findMany({
-//       where: {
-//         managerId: parseInt(managerId),
-//       },
-//       include: {
-//         manager: true,
-//         employee: true,
-//       },
-//     });
-//     // 
-//     const managerEmployeesWithHours = await Promise.all(managerEmployees.map(async (relation) => {
-//       const emps = Array.isArray(relation.employee) ? relation.employee : [relation.employee];
-//       const list_of_timesheets = [];
-    
-//       for (const emp of emps) {
-//         let obj = {
-//           emp: emp,
-//         };
-//         let timedata = [];
-    
-//         try {
-//           const data = await getTimesheet(emp.EmployeeID, startDate, endDate);
-//           timedata = data;
-    
-//           timedata.forEach(element => {
-//             obj['hours'] = (obj['hours'] || 0) + (element.HoursWorked || 0);
-//           });
-    
-//           list_of_timesheets.push(obj);
-//         } catch (error) {
-//           console.error(`Error fetching timesheet for EmployeeID ${emp.EmployeeID}:`, error);
-//         }
-//       }
-    
-//       return list_of_timesheets;
-//     }));
-    
-
-//     res.json(managerEmployeesWithHours);
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: 'Internal Server Error' });
-//   }
-// };
-
-
-// async function getTimesheet(employeeId, startDate, endDate) {
-//  console.log(employeeId, startDate, endDate)
-//   const timesheets = await prisma.timesheet.findMany({
-//     where: {
-//       EmployeeID: employeeId,
-//       Date: {
-//         gte: new Date(startDate) ,
-//         lte: new Date(endDate),
-//       },
-//     },
-//   });
-//   console.log(timesheets)
-//   return timesheets;
-// }
-// const csvdata = async (req,res)=> {
-// // app.get('/export-csv', async (req, res) => {
-//   try {    
-//     const employeesData = await getEmployeesUnderManagerOnSameProject(req, res);
-//     // const managerEmployeesWithHoursData = await createManagerEmployeesWithHours(req, res);   
-//     const combinedData = [...employeesData];
-    
-//     const csvWriter = createCsvWriter({
-//       path: 'output.csv',
-//       header: [
-//         { id: 'manager.name', title: 'Manager Name' },
-//         { id: 'employee.name', title: 'Employee Name' },
-//         { id: 'totalHours', title: 'Total Hours Worked' },
-//         { id: 'clientId', title: 'Client ID' },
-//       ],
-//     });
-   
-//     csvWriter.writeRecords(combinedData).then(() => {
-//       console.log('CSV file has been written successfully');
-//       res.download('output.csv'); 
-//     });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: 'Internal Server Error' });
-//   }
-
-// }
 
 module.exports = {    
   getTimesheetsByManagerAndDateRange,

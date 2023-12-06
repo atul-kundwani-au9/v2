@@ -161,20 +161,42 @@ const createManagerEmployeesWithHours = async (req, res) => {
 };
 
 
+// async function getTimesheet(employeeId, startDate, endDate) {
+//  console.log(employeeId, startDate, endDate)
+//   const timesheets = await prisma.timesheet.findMany({
+//     where: {
+//       EmployeeID: employeeId,
+//       Date: {
+//         gte: new Date(startDate) ,
+//         lte: new Date(endDate),
+//       },
+//     },
+//   });
+//   console.log(timesheets)
+//   return timesheets;
+// }
 async function getTimesheet(employeeId, startDate, endDate) {
- console.log(employeeId, startDate, endDate)
-  const timesheets = await prisma.timesheet.findMany({
-    where: {
-      EmployeeID: employeeId,
-      Date: {
-        gte: new Date(startDate) ,
-        lte: new Date(endDate),
+  try {
+    console.log(employeeId, startDate, endDate);
+
+    const timesheets = await prisma.timesheet.findMany({
+      where: {
+        EmployeeID: employeeId,
+        Date: {
+          gte: new Date(startDate + 'T00:00:00Z'),  
+          lte: new Date(endDate + 'T23:59:59Z'),    
+        },
       },
-    },
-  });
-  console.log(timesheets)
-  return timesheets;
+    });
+
+    console.log(timesheets);
+    return timesheets;
+  } catch (error) {
+    console.error('Error fetching timesheet:', error);
+    throw error;
+  }
 }
+
 const getManagers = async (req, res) => {
   try {
     const managers = await prisma.employee.findMany({

@@ -65,9 +65,153 @@ function generateToken(payload) {
   return jwt.sign(payload, secretKey, { expiresIn: '1h' });
 }
 
+// const getEmployeeProfile = async (req, res) => {
+//   try {
+//     const { employeeId } = req.params;
 
+//     const employee = await prisma.employee.findUnique({
+//       where: {
+//         EmployeeID: parseInt(employeeId),
+//       },
+//       include: {
+//         managingEmployees: {
+//           select: {
+//             manager: {
+//               select: {
+//                 FirstName: true,
+//                 LastName: true,
+//               },
+//             },
+//           },
+//         },
+//         employeesManagedBy: {
+//           select: {
+//             employee: {
+//               select: {
+//                 FirstName: true,
+//                 LastName: true,
+//               },
+//             },
+//           },
+//         },
+//         Timesheets: {
+//           select: {
+//             Project: {
+//               select: {
+//                 ProjectID: true,
+//                 ProjectName: true,
+                
+//               },
+//             },
+//             HoursWorked: true,
+//           },
+//         },
+//       },
+//     });
 
+//     if (!employee) {
+//       return res.status(404).json({ error: 'Employee not found' });
+//     }
+//     const managerFirstName = employee.managingEmployees?.manager?.FirstName;
+//     const managerLastName = employee.managingEmployees?.manager?.LastName;
+//     const employeeProfile = {
+//       EmployeeID: employee.EmployeeID,
+//       FirstName: employee.FirstName,
+//       LastName: employee.LastName,     
+//       Manager: managerFirstName && managerLastName ? `${managerFirstName} ${managerLastName}` : 'Not Assigned',
+//       EmployeesManaged: employee.employeesManagedBy.map((relation) => ({
+//         FirstName: relation.employee?.FirstName || 'N/A',
+//         LastName: relation.employee?.LastName || 'N/A',
+//       })),
+//       Timesheets: employee.Timesheets.map((timesheet) => ({
+//         ProjectID: timesheet.Project.ProjectID,
+//         ProjectName: timesheet.Project.ProjectName,
+//         HoursWorked: timesheet.HoursWorked || 0,
+        
+//       })),
+//     };
 
+//     res.json(employeeProfile);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: 'Internal Server Error' });
+//   }
+// };
+
+// const getEmployeeProfile = async (req, res) => {
+//   try {
+//     const { employeeId } = req.params;
+
+//     const employee = await prisma.employee.findUnique({
+//       where: {
+//         EmployeeID: parseInt(employeeId),
+//       },
+//       include: {
+//         managingEmployees: {
+//           select: {
+//             manager: {
+//               select: {
+//                 FirstName: true,
+//                 LastName: true,
+//               },
+//             },
+//           },
+//         },
+//         employeesManagedBy: {
+//           select: {
+//             employee: {
+//               select: {
+//                 FirstName: true,
+//                 LastName: true,
+//                 Timesheets: {
+//                   select: {
+//                     Project: true,
+//                   },
+//                 },
+             
+//               },
+//             },
+//           },
+//         },
+//       },
+//     });
+
+//     if (!employee) {
+//       return res.status(404).json({ error: 'Employee not found' });
+//     }
+
+// const managerFirstName = employee.managingEmployees?.manager?.FirstName;
+//     const managerLastName = employee.managingEmployees?.manager?.LastName;
+
+   
+//     const projects = employee.employeesManagedBy
+//       .map((relation) =>
+//         relation.employee.Timesheets.map((timesheet) => ({
+//           ProjectID: timesheet.Project.ProjectID,
+//           ProjectName: timesheet.Project.ProjectName,
+          
+//         }))
+//       )
+//       .flat();
+
+//     const employeeProfile = {
+//       EmployeeID: employee.EmployeeID,
+//       FirstName: employee.FirstName,
+//       LastName: employee.LastName,
+//       Manager: managerFirstName && managerLastName ? `${managerFirstName} ${managerLastName}` : 'Not Assigned',
+//       EmployeesManaged: employee.employeesManagedBy.map((relation) => ({
+//         FirstName: relation.employee?.FirstName || 'N/A',
+//         LastName: relation.employee?.LastName || 'N/A',
+//       })),
+//       Projects: projects,
+//     };
+
+//     res.json(employeeProfile);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: 'Internal Server Error' });
+//   }
+// };
 const getEmployeeProfile = async (req, res) => {
   try {
     const { employeeId } = req.params;
@@ -93,20 +237,19 @@ const getEmployeeProfile = async (req, res) => {
               select: {
                 FirstName: true,
                 LastName: true,
+                Timesheets: {
+                  select: {
+                    Project: {
+                      select: {
+                        ProjectID: true,
+                        ProjectName: true,
+                      },
+                    },
+                    HoursWorked: true,
+                  },
+                },
               },
             },
-          },
-        },
-        Timesheets: {
-          select: {
-            Project: {
-              select: {
-                ProjectID: true,
-                ProjectName: true,
-                
-              },
-            },
-            HoursWorked: true,
           },
         },
       },
@@ -115,26 +258,75 @@ const getEmployeeProfile = async (req, res) => {
     if (!employee) {
       return res.status(404).json({ error: 'Employee not found' });
     }
+
     const managerFirstName = employee.managingEmployees?.manager?.FirstName;
     const managerLastName = employee.managingEmployees?.manager?.LastName;
+
+    const projects = employee.employeesManagedBy
+      .map((relation) =>
+        relation.employee.Timesheets.map((timesheet) => ({
+          ProjectID: timesheet.Project.ProjectID,
+          ProjectName: timesheet.Project.ProjectName,
+          HoursWorked: timesheet.HoursWorked || 0, // Default to 0 if HoursWorked is null
+        }))
+      )
+      .flat();
+
     const employeeProfile = {
       EmployeeID: employee.EmployeeID,
       FirstName: employee.FirstName,
-      LastName: employee.LastName,     
+      LastName: employee.LastName,
       Manager: managerFirstName && managerLastName ? `${managerFirstName} ${managerLastName}` : 'Not Assigned',
       EmployeesManaged: employee.employeesManagedBy.map((relation) => ({
         FirstName: relation.employee?.FirstName || 'N/A',
         LastName: relation.employee?.LastName || 'N/A',
       })),
-      Timesheets: employee.Timesheets.map((timesheet) => ({
-        ProjectID: timesheet.Project.ProjectID,
-        ProjectName: timesheet.Project.ProjectName,
-        HoursWorked: timesheet.HoursWorked || 0,
-        
-      })),
+      Projects: projects,
     };
 
     res.json(employeeProfile);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+const getEmployeewithManager= async (req, res) => {
+  try {
+      
+    const employee = await prisma.employee.findMany({
+      include: {
+        managingEmployees: {
+          select: {
+            manager: {
+              select: {
+                FirstName: true,
+                LastName: true,
+              },
+            },
+          },
+        },
+        employeesManagedBy: {
+          include: {
+            manager:{
+              select: {
+                FirstName: true,
+                LastName: true,
+              },
+            }
+          
+          },
+        },
+      }
+      
+    });
+
+    if (!employee) {
+      return res.status(404).json({ error: 'Employee not found' });
+    }
+
+
+    res.json(employee);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
@@ -146,6 +338,7 @@ module.exports = {
   registerEmployee,
   loginEmployee,
   getEmployeeList,
+  getEmployeewithManager
 };
 
 

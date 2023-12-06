@@ -64,7 +64,67 @@ const getEmployeeReport = async (req, res) => {
   }
 };
 
+
+const getManagerReport = async (req, res) => {
+  try {
+    const { managerId, startDate, endDate } = req.body;
+
+    
+    const managedEmployees = await prisma.managerEmployee.findMany({
+      where: {
+        managerId: parseInt(managerId),
+      },
+      select: {
+        employeeId: true,
+      },
+    });
+    
+    const managedEmployeeIds = managedEmployees.map((entry) => entry.employeeId);
+    
+    const submittedTimesheets = await prisma.timesheet.findMany({
+      where: {
+        EmployeeID: {
+          in: managedEmployeeIds,
+        },
+        Date: {
+          gte: new Date(startDate),
+          lte: new Date(endDate),
+        },
+        Status: 'submitted',
+      },
+      distinct: ['EmployeeID'], 
+    });
+
+    const allEmployees = await prisma.employee.findMany();
+
+    const submittedEmployeeIds = submittedTimesheets.map((timesheet) => timesheet.EmployeeID);
+
+    const submittedEmployees = allEmployees.filter((employee) =>
+      submittedEmployeeIds.includes(employee.EmployeeID)
+    );
+
+    const notSubmittedEmployees = allEmployees.filter(
+      (employee) => !submittedEmployeeIds.includes(employee.EmployeeID)
+    );
+
+    const response = {
+      submittedEmployees: submittedEmployees,
+      notSubmittedEmployees: notSubmittedEmployees,
+      totalSubmitted: submittedEmployees.length,
+      totalNotSubmitted: notSubmittedEmployees.length,
+      status: 'success',
+    };
+
+    res.json(response);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+
 module.exports = {
+  getManagerReport,
   getClientReport,
   getProjectReport,
   getEmployeeReport,
