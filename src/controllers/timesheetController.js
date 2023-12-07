@@ -45,7 +45,6 @@ const createTimesheets = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
-
 const getAllTimesheetdata = async (req, res) => {
   try {
     const { EmployeeID, startDate, endDate } = req.body;   
@@ -124,9 +123,7 @@ const getTimesheetsByManagerAndDateRange = async (req, res) => {
 
 const approveTimesheet = async (req, res) => {
   try {
-    const { employeeId, startDate, endDate } = req.body;
-
-    
+    const { employeeId, startDate, endDate } = req.body;    
     const isValidDateFormat = (dateString) => {
       const regex = /^\d{4}-\d{2}-\d{2}$/;
       return regex.test(dateString);

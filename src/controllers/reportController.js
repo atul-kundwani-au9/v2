@@ -55,8 +55,7 @@ const getEmployeeReport = async (req, res) => {
         Employee: true,
         Project: true,
       },
-    });
-    
+    });    
     res.json(employeeReport);
   } catch (error) {
     console.error(error);
