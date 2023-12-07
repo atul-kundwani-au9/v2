@@ -2,7 +2,6 @@
 const { PrismaClient } = require('@prisma/client');
 const timesheetModel = require('../models/timesheetModel');
 const prisma = new PrismaClient();
-// const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 const express = require('express');
 const router = require('../routes/timesheetRoutes');
 const app = express();
@@ -16,22 +15,19 @@ const createTimesheets = async (req, res) => {
     const results = await Promise.all(
       timesheetEntries.map(async (entry) => {
         const { EmployeeID, ProjectID, entryDate, Status, Description, HoursWorked, EntryType } = entry;
-
         const existingEmployee = await prisma.employee.findUnique({
-          where: {
+          where: {           
             EmployeeID: EmployeeID,
           },
         });
-
         if (!existingEmployee) {
           return { error: `Employee with ID ${EmployeeID} not found` };
         }
-        const date = new Date(entryDate);
-     
+        const date = new Date(entryDate);     
         if (EntryType === 'weekly') {       
         } else if (EntryType === 'monthly') {         
         }
-        const timesheetData = {
+        const timesheetData = {        
           EmployeeID,
           ProjectID,
           Date: date,
@@ -39,31 +35,16 @@ const createTimesheets = async (req, res) => {
           HoursWorked,
           Description,
         };
-
         const timesheet = await timesheetModel.createTimesheet(timesheetData);
         return timesheet;
       })
     );
-//     const timesheet = await prisma.timesheet.upsert({
-//       where: {
-//         EmployeeID: EmployeeID,
-//         ProjectID: ProjectID,
-//         Date: date,
-//       },
-//       update: timesheetData,
-//       create: timesheetData,
-//     });
-
-//     return timesheet;
-//   })
-// );
     res.json(results);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
-
 
 const getAllTimesheetdata = async (req, res) => {
   try {
@@ -112,10 +93,8 @@ const getTimesheetList = async (req, res) => {
   }
 };
 
-const getTimesheetsByEmployeeAndDateRange = async (req, res) => {
-  
+const getTimesheetsByEmployeeAndDateRange = async (req, res) => {  
   try {
-
     const { employeeId, startDate, endDate } = req.body;
     const timesheets = await timesheetModel.getTimesheetsByEmployeeAndDateRange(
       parseInt(employeeId),
@@ -168,9 +147,7 @@ const approveTimesheet = async (req, res) => {
       data: {
         Status: 'approved',
       },
-    });
-
-    // Fetch the updated timesheets
+    });   
     const updatedTimesheets = await prisma.timesheet.findMany({
       where: {
         EmployeeID: employeeId,
@@ -229,7 +206,6 @@ const rejectTimesheet = async (req, res) => {
     if (!isValidDateFormat(startDate) || !isValidDateFormat(endDate)) {
       return res.status(400).json({ error: 'Invalid date format for startDate or endDate' });
     }
-
    
     const updateResult = await prisma.timesheet.updateMany({
       where: {
@@ -243,7 +219,6 @@ const rejectTimesheet = async (req, res) => {
         Status: 'rejected',
       },
     });
-
    
     const updatedTimesheets = await prisma.timesheet.findMany({
       where: {
@@ -255,7 +230,6 @@ const rejectTimesheet = async (req, res) => {
         Status: 'rejected',
       },
     });
-
    
     res.json(updatedTimesheets);
   } catch (error) {
@@ -264,20 +238,17 @@ const rejectTimesheet = async (req, res) => {
   }
 };
 
+
 const getEmployeesUnderManagerOnSameProject = async (req, res) => {
   try {
-    const { managerId, employeeId, projectId, startDate, endDate,clientId } = req.body;
+    const { managerId, projectId, startDate, endDate, clientId } = req.body;
+    
     const managerExists = await prisma.employee.findUnique({
       where: { EmployeeID: managerId },
     });
 
-    const employeeExists = await prisma.employee.findUnique({
-      where: { EmployeeID: employeeId },
-    });
-
-    if (!managerExists || !employeeExists) {
-      return res.status(404).json({ error: 'Manager or Employee not found' });
-    }
+    if (!managerExists) {
+      return res.status(404).json({ error: 'Manager not found' });    }
 
     const employeesList = await prisma.managerEmployee.findMany({
       where: {
@@ -286,7 +257,6 @@ const getEmployeesUnderManagerOnSameProject = async (req, res) => {
       include: {
         manager: true,
         employee: {
-          
           include: {
             Timesheets: {
               where: {
@@ -312,7 +282,7 @@ const getEmployeesUnderManagerOnSameProject = async (req, res) => {
         manager: relation.manager,
         employee: relation.employee,
         totalHours: totalHours,
-        clientId: clientId, 
+        clientId: clientId,
       };
     });
 
@@ -322,61 +292,6 @@ const getEmployeesUnderManagerOnSameProject = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
-// const getEmployeesUnderManagerOnSameProject = async (req, res) => {
-//   try {
-//     const { managerId, projectId, startDate, endDate, clientId } = req.body;
-//     const managerExists = await prisma.employee.findUnique({
-//       where: { EmployeeID: managerId },
-//     });
-
-//     if (!managerExists) {
-//       return res.status(404).json({ error: 'Manager not found' });
-//     }
-
-//     const employeesList = await prisma.managerEmployee.findMany({
-//       where: {
-//         managerId: managerId,
-//       },
-//       include: {
-//         manager: true,
-//         employee: {
-//           include: {
-//             Timesheets: {
-//               where: {
-//                 ProjectID: projectId,
-//                 Date: {
-//                   gte: new Date(startDate),
-//                   lte: new Date(endDate),
-//                 },
-//               },
-//             },
-//           },
-//         },
-//       },
-//     });
-
-//     const result = employeesList.map((relation) => {
-//       const totalHours = (relation.employee?.Timesheets || []).reduce(
-//         (total, timesheet) => total + timesheet.HoursWorked,
-//         0
-//       );
-
-//       return {
-//         manager: relation.manager,
-//         employee: relation.employee,
-//         totalHours: totalHours,
-//         clientId: clientId,
-//       };
-//     });
-
-//     res.json(result);
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: 'Internal Server Error' });
-//   }
-// };
-
-
 
 module.exports = {    
   getTimesheetsByManagerAndDateRange,

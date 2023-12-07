@@ -178,14 +178,12 @@ const getEmployeewithManager= async (req, res) => {
       return res.status(404).json({ error: 'Employee not found' });
     }
 
-
     res.json(employee);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
-
 module.exports = {
   getEmployeeProfile,
   registerEmployee,
