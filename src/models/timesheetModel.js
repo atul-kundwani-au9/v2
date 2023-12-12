@@ -90,8 +90,9 @@ const createTimesheet = async (data) => {
     if (!existingTimesheet) {
     
       return { error: `Timesheet with ID ${TimesheetID} not found` };
+      
     }
-
+    
     const updatedTimesheet = await prisma.timesheet.update({
       where: {
         TimesheetID: TimesheetID,
@@ -109,6 +110,7 @@ const createTimesheet = async (data) => {
     return updatedTimesheet;
   }
 };
+
 const getTimesheetsByEmployeeAndDateRange = async (employeeId, startDate, endDate) => {
   return prisma.timesheet.findMany({
     where: {
@@ -160,3 +162,4 @@ module.exports = {
   getTimesheets,
   getTimesheetsByEmployeeAndDateRange,
 };
+  
