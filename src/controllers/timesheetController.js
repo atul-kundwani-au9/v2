@@ -2,16 +2,75 @@
 const { PrismaClient } = require('@prisma/client');
 const timesheetModel = require('../models/timesheetModel');
 const prisma = new PrismaClient();
+const bodyParser = require('body-parser');
 const express = require('express');
 const router = require('../routes/timesheetRoutes');
 const app = express();
+const nodemailer = require('nodemailer');
+app.use(bodyParser.json());
+// const createTimesheets = async (req, res) => {
+//   try {
+//     const timesheetEntries = req.body.timesheets;
+//     if (!timesheetEntries || !Array.isArray(timesheetEntries)) {
+//       return res.status(400).json({ error: 'Invalid timesheetEntries in the request body' });
+//     }
+//     const results = await Promise.all(
+//       timesheetEntries.map(async (entry) => {
+//         const { EmployeeID, ProjectID, entryDate, Status, Description, HoursWorked, EntryType } = entry;
+//         const existingEmployee = await prisma.employee.findUnique({
+//           where: {
+//             EmployeeID: EmployeeID,
+//           },
+//         });
+//         if (!existingEmployee) {
+//           return { error: `Employee with ID ${EmployeeID} not found` };
+//         }
+//         const date = new Date(entryDate);
+//         date.setHours(0, 0, 0, 0);
+//         const existingTimesheet = await prisma.timesheet.findFirst({
+//           where: {
+//             EmployeeID: EmployeeID,
+//             ProjectID: ProjectID,
+//             Date: date,
+//           },
+//         });
 
+//         if (existingTimesheet) {
+//           // Update the existing timesheet entry
+//           // const updatedTimesheet = await timesheetModel.updateTimesheet(existingTimesheet.id, {
+//           //   Status,
+//           //   HoursWorked,
+//           //   Description,
+//           // });
+//           // return updatedTimesheet;
+//         } else {
+
+//           const timesheetData = {
+//             EmployeeID,
+//             ProjectID,
+//             Date: date,
+//             Status,
+//             HoursWorked,
+//             Description,
+//           };
+//           const timesheet = await timesheetModel.createTimesheet(timesheetData);
+//           return timesheet;
+//         }
+//       })
+//     );
+//     res.json(results);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: 'Internal Server Error' });
+//   }
+// };
 const createTimesheets = async (req, res) => {
   try {
     const timesheetEntries = req.body.timesheets;
     if (!timesheetEntries || !Array.isArray(timesheetEntries)) {
       return res.status(400).json({ error: 'Invalid timesheetEntries in the request body' });
     }
+
     const results = await Promise.all(
       timesheetEntries.map(async (entry) => {
         const { EmployeeID, ProjectID, entryDate, Status, Description, HoursWorked, EntryType } = entry;
@@ -20,11 +79,14 @@ const createTimesheets = async (req, res) => {
             EmployeeID: EmployeeID,
           },
         });
+
         if (!existingEmployee) {
           return { error: `Employee with ID ${EmployeeID} not found` };
         }
+
         const date = new Date(entryDate);
         date.setHours(0, 0, 0, 0);
+
         const existingTimesheet = await prisma.timesheet.findFirst({
           where: {
             EmployeeID: EmployeeID,
@@ -32,17 +94,8 @@ const createTimesheets = async (req, res) => {
             Date: date,
           },
         });
-
-        if (existingTimesheet) {
-          // Update the existing timesheet entry
-          const updatedTimesheet = await timesheetModel.updateTimesheet(existingTimesheet.id, {
-            Status,
-            HoursWorked,
-            Description,
-          });
-          return updatedTimesheet;
-        } else {
-
+       
+        if (!existingTimesheet) {             
           const timesheetData = {
             EmployeeID,
             ProjectID,
@@ -51,17 +104,20 @@ const createTimesheets = async (req, res) => {
             HoursWorked,
             Description,
           };
+          console.log(timesheetData)    
           const timesheet = await timesheetModel.createTimesheet(timesheetData);
           return timesheet;
         }
       })
     );
-    res.json(results);
+
+    res.json(results.filter(Boolean)); 
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
 const getAllTimesheetdata = async (req, res) => {
   try {
     const { EmployeeID, startDate, endDate } = req.body;
@@ -308,7 +364,7 @@ const pendingTimesheet = async (req, res) => {
 
 const rejectTimesheet = async (req, res) => {
   try {
-    const { employeeId, startDate, endDate } = req.body;
+    const { employeeIds, startDate, endDate } = req.body;
 
 
     const isValidDateFormat = (dateString) => {
@@ -322,7 +378,9 @@ const rejectTimesheet = async (req, res) => {
 
     const updateResult = await prisma.timesheet.updateMany({
       where: {
-        EmployeeID: employeeId,
+        EmployeeID: {
+          in: employeeIds, 
+        },
         Date: {
           gte: new Date(startDate),
           lte: new Date(endDate),
@@ -335,7 +393,9 @@ const rejectTimesheet = async (req, res) => {
 
     const updatedTimesheets = await prisma.timesheet.findMany({
       where: {
-        EmployeeID: employeeId,
+        EmployeeID: {
+          in: employeeIds, 
+        },
         Date: {
           gte: new Date(startDate),
           lte: new Date(endDate),

@@ -18,98 +18,120 @@ const getTimesheets = async () => {
     },
   });
 };
-// const createTimesheet = async (data) => {
-//   const { EmployeeID, ProjectID, Date ,HoursWorked,Status,Description} = data;
-  
-//   const timesheet = await prisma.timesheet.upsert({
-//     where: {      
-//       TimesheetID:1,
-//       EmployeeID,
-//       ProjectID,
-//       Date,
-//       HoursWorked,
-//       Status,
-//       Description
-//     },
-//     update: data, 
-//     create: data, 
-//   });
 
-//   return timesheet;
-// };
 // const createTimesheet = async (data) => {
 //   const { TimesheetID, EmployeeID, ProjectID, Date, HoursWorked, Status, Description } = data;
-//   const existingTimesheet = await prisma.timesheet.findUnique({
-//     where: {      
-//       TimesheetID: TimesheetID,
-//     },
-//   }); 
-//   if (!existingTimesheet) {   
-//     return { error: `Timesheet with ID ${TimesheetID} not found` };
+
+//   if (typeof TimesheetID === 'undefined') {
+    
+//     const newTimesheet = await prisma.timesheet.create({
+//       data: {
+//         EmployeeID,
+//         ProjectID,
+//         Date,
+//         HoursWorked,
+//         Status,
+//         Description,
+//       },
+//     });
+
+//     return newTimesheet;
+//   } else {
+   
+//     const existingTimesheet = await prisma.timesheet.findUnique({
+//       where: {
+//         TimesheetID: TimesheetID,
+//       },
+//     });
+//     if (!existingTimesheet) {    
+//       return { error: `Timesheet with ID ${TimesheetID} not found` };      
+//     }
+    
+//     const updatedTimesheet = await prisma.timesheet.update({
+//       where: {
+//         TimesheetID: TimesheetID,
+//       },
+//       data: {
+//         EmployeeID,
+//         ProjectID,
+//         Date,
+//         HoursWorked,
+//         Status,
+//         Description,
+//       },
+//     });
+
+//     return updatedTimesheet;
 //   }
-//   const updatedTimesheet = await prisma.timesheet.update({
-//     where: {
-//       TimesheetID: TimesheetID,
-//     },
-//     data: {      
-//       EmployeeID,
-//       ProjectID,
-//       Date,
-//       HoursWorked,
-//       Status,
-//       Description,
+// };
+// const createTimesheet = async (data) => {
+//   const { EmployeeID, ProjectID, Date, HoursWorked, Status, Description } = data;
+//   const existingTimesheet = await prisma.timesheet.findFirst({
+//     where: {  
+//       EmployeeID: EmployeeID,
+//       ProjectID: ProjectID,
+//       Date: date,
 //     },
 //   });
-//   return updatedTimesheet;
+//   if (existingTimesheet) {
+//     // delete existingTimesheet from Prisma;
+
+//   } else {
+
+    
+   
+//     // Here instaed of update create new timesheet 
+//     const updatedTimesheet = await prisma.timesheet.update({
+//       where: {
+//         TimesheetID: TimesheetID,
+//       },
+//       data: {
+//         EmployeeID,
+//         ProjectID,
+//         Date,
+//         HoursWorked,
+//         Status,
+//         Description,
+//       },
+//     });
+
+//     return updatedTimesheet;
+//   }
 // };
 const createTimesheet = async (data) => {
-  const { TimesheetID, EmployeeID, ProjectID, Date, HoursWorked, Status, Description } = data;
-
-  if (typeof TimesheetID === 'undefined') {
-    
-    const newTimesheet = await prisma.timesheet.create({
-      data: {
-        EmployeeID,
-        ProjectID,
-        Date,
-        HoursWorked,
-        Status,
-        Description,
-      },
-    });
-
-    return newTimesheet;
-  } else {
-   
-    const existingTimesheet = await prisma.timesheet.findUnique({
+  const { EmployeeID, ProjectID, Date, HoursWorked, Status, Description } = data;
+  const existingTimesheet = await prisma.timesheet.findFirst({
+    where: {
+      EmployeeID: EmployeeID,
+      ProjectID: ProjectID,
+      Date:Date,
+    },
+  });
+  if (existingTimesheet) {
+    await prisma.timesheet.delete({
       where: {
-        TimesheetID: TimesheetID,
+        TimesheetID: existingTimesheet.TimesheetID,
       },
     });
 
-    if (!existingTimesheet) {
-    
-      return { error: `Timesheet with ID ${TimesheetID} not found` };
-      
-    }
-    
-    const updatedTimesheet = await prisma.timesheet.update({
-      where: {
-        TimesheetID: TimesheetID,
-      },
-      data: {
-        EmployeeID,
-        ProjectID,
-        Date,
-        HoursWorked,
-        Status,
-        Description,
-      },
-    });
-
-    return updatedTimesheet;
   }
+  
+  const updatedTimesheet = await prisma.timesheet.create({
+   
+    data: {
+      EmployeeID,
+      ProjectID,
+      Date,
+      HoursWorked,
+      Status,
+      Description,
+    },
+  });
+
+  return updatedTimesheet;
+
 };
+
 
 const getTimesheetsByEmployeeAndDateRange = async (employeeId, startDate, endDate) => {
   return prisma.timesheet.findMany({
