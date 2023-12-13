@@ -87,31 +87,24 @@ const createTimesheets = async (req, res) => {
         const date = new Date(entryDate);
         date.setHours(0, 0, 0, 0);
 
-        const existingTimesheet = await prisma.timesheet.findFirst({
-          where: {
-            EmployeeID: EmployeeID,
-            ProjectID: ProjectID,
-            Date: date,
-          },
-        });
-       
-        if (!existingTimesheet) {             
-          const timesheetData = {
-            EmployeeID,
-            ProjectID,
-            Date: date,
-            Status,
-            HoursWorked,
-            Description,
-          };
-          console.log(timesheetData)    
-          const timesheet = await timesheetModel.createTimesheet(timesheetData);
-          return timesheet;
-        }
+
+
+        const timesheetData = {
+          EmployeeID,
+          ProjectID,
+          Date: date,
+          Status,
+          HoursWorked,
+          Description,
+        };
+        console.log(timesheetData)
+        const timesheet = await timesheetModel.createTimesheet(timesheetData);
+        return timesheet;
+
       })
     );
 
-    res.json(results.filter(Boolean)); 
+    res.json(results.filter(Boolean));
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
@@ -379,7 +372,7 @@ const rejectTimesheet = async (req, res) => {
     const updateResult = await prisma.timesheet.updateMany({
       where: {
         EmployeeID: {
-          in: employeeIds, 
+          in: employeeIds,
         },
         Date: {
           gte: new Date(startDate),
@@ -394,7 +387,7 @@ const rejectTimesheet = async (req, res) => {
     const updatedTimesheets = await prisma.timesheet.findMany({
       where: {
         EmployeeID: {
-          in: employeeIds, 
+          in: employeeIds,
         },
         Date: {
           gte: new Date(startDate),
@@ -468,7 +461,7 @@ const getEmployeesUnderManagerOnSameProject = async (req, res) => {
 };
 
 module.exports = {
-  
+
   getTimesheetsByManagerAndDateRange,
   getEmployeesUnderManagerOnSameProject,
   getTimesheetsByEmployeeAndDateRange,
