@@ -10,11 +10,11 @@ const employeeModel = require('../models/employeeModel');
 const { secretKey } = require('../config/config');
 const registerEmployee = async (req, res) => {
   try {
-   
-    const { FirstName, LastName, Email, Password, Admin, EmployeeType } = req.body;    
-    
+
+    const { FirstName, LastName, Email, Password, Admin, EmployeeType } = req.body;
+
     const hashedPassword = await bcrypt.hash(Password, 10);
-    
+
     const employee = await employeeModel.createEmployee({
       FirstName,
       LastName,
@@ -23,8 +23,8 @@ const registerEmployee = async (req, res) => {
       Admin,
       EmployeeType,
     });
-    
-    
+
+
     res.json({ employee });
   } catch (error) {
     console.error(error);
@@ -34,13 +34,13 @@ const registerEmployee = async (req, res) => {
 const loginEmployee = async (req, res) => {
   try {
     const { Email, Password } = req.body;
-    
+
     const employee = await employeeModel.getEmployeeByEmail(Email);
-   
+
     if (!employee || !(await bcrypt.compare(Password, employee.Password))) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
-   
+
     const token = generateToken({ id: employee.EmployeeID, email: employee.Email });
     const status = "success";
     res.json({ employee, token, status });
@@ -53,7 +53,7 @@ const loginEmployee = async (req, res) => {
 
 const getEmployeeList = async (req, res) => {
   try {
-    const employees = await employeeModel.getEmployees();   
+    const employees = await employeeModel.getEmployees();
     res.json(employees);
   } catch (error) {
     console.error(error);
@@ -120,7 +120,7 @@ const getEmployeeProfile = async (req, res) => {
         relation.employee.Timesheets.map((timesheet) => ({
           ProjectID: timesheet.Project.ProjectID,
           ProjectName: timesheet.Project.ProjectName,
-          HoursWorked: timesheet.HoursWorked || 0, 
+          HoursWorked: timesheet.HoursWorked || 0,
         }))
       )
       .flat();
@@ -135,7 +135,6 @@ const getEmployeeProfile = async (req, res) => {
       return acc;
     }, []);
 
-    // Rest of the code...
 
     const employeeProfile = {
       EmployeeID: employee.EmployeeID,
@@ -156,30 +155,9 @@ const getEmployeeProfile = async (req, res) => {
   }
 };
 
-    
-
-    const employeeProfile = {
-      EmployeeID: employee.EmployeeID,
-      FirstName: employee.FirstName,
-      LastName: employee.LastName,
-      Manager: managerFirstName && managerLastName ? `${managerFirstName} ${managerLastName}` : 'Not Assigned',
-      EmployeesManaged: employee.employeesManagedBy.map((relation) => ({
-        FirstName: relation.employee?.FirstName || 'N/A',
-        LastName: relation.employee?.LastName || 'N/A',
-      })),
-      Projects: projects,
-    };
-
-    res.json(employeeProfile);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-};
-
-const getEmployeewithManager= async (req, res) => {
+const getEmployeewithManager = async (req, res) => {
   try {
-      
+
     const employee = await prisma.employee.findMany({
       include: {
         managingEmployees: {
@@ -194,17 +172,17 @@ const getEmployeewithManager= async (req, res) => {
         },
         employeesManagedBy: {
           include: {
-            manager:{
+            manager: {
               select: {
                 FirstName: true,
                 LastName: true,
               },
             }
-          
+
           },
         },
       }
-      
+
     });
 
     if (!employee) {
