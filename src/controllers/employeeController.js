@@ -125,6 +125,39 @@ const getEmployeeProfile = async (req, res) => {
       )
       .flat();
 
+    const uniqueProjects = projects.reduce((acc, project) => {
+      const existingProject = acc.find(p => p.ProjectID === project.ProjectID);
+      if (existingProject) {
+        existingProject.HoursWorked += project.HoursWorked;
+      } else {
+        acc.push(project);
+      }
+      return acc;
+    }, []);
+
+    // Rest of the code...
+
+    const employeeProfile = {
+      EmployeeID: employee.EmployeeID,
+      FirstName: employee.FirstName,
+      LastName: employee.LastName,
+      Manager: managerFirstName && managerLastName ? `${managerFirstName} ${managerLastName}` : 'Not Assigned',
+      EmployeesManaged: employee.employeesManagedBy.map((relation) => ({
+        FirstName: relation.employee?.FirstName || 'N/A',
+        LastName: relation.employee?.LastName || 'N/A',
+      })),
+      Projects: uniqueProjects,
+    };
+
+    res.json(employeeProfile);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+    
+
     const employeeProfile = {
       EmployeeID: employee.EmployeeID,
       FirstName: employee.FirstName,
