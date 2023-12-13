@@ -202,7 +202,7 @@ const approveTimesheet = async (req, res) => {
     const updateResult = await prisma.timesheet.updateMany({
       where: {
         EmployeeID: {
-          in: employeeIds, // Use 'in' to filter by multiple employeeIds
+          in: employeeIds, 
         },
         Date: {
           gte: new Date(startDate),
@@ -259,10 +259,6 @@ const pendingTimesheet = async (req, res) => {
 
 };
 
-
-
-
-
 const rejectTimesheet = async (req, res) => {
   try {
     const { employeeIds, startDate, endDate } = req.body;
@@ -303,7 +299,6 @@ const rejectTimesheet = async (req, res) => {
         Status: 'rejected',
       },
     });
-
     
     const transporter = nodemailer.createTransport({
       service: 'gmail',
@@ -327,7 +322,6 @@ const rejectTimesheet = async (req, res) => {
         Email: true,
       },
     });
-
     
     employees.forEach(async (employee) => {
       const mailOptions = {
@@ -347,15 +341,12 @@ const rejectTimesheet = async (req, res) => {
       });
     });
 
-    res.json(updatedTimesheets);
+    res.json({ message: 'Timesheets rejected successfully',updatedTimesheets});
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
-
-
-
 
 const getEmployeesUnderManagerOnSameProject = async (req, res) => {
   try {
@@ -368,7 +359,6 @@ const getEmployeesUnderManagerOnSameProject = async (req, res) => {
     if (!managerExists) {
       return res.status(404).json({ error: 'Manager not found' });
     }
-
     const employeesList = await prisma.managerEmployee.findMany({
       where: {
         managerId: managerId,
