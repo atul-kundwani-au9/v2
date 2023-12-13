@@ -231,101 +231,6 @@ const approveTimesheet = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
-// const approveTimesheet = async (req, res) => {
-//   try {
-//     const { employeeIds, startDate, endDate } = req.body;
-
-//     const isValidDateFormat = (dateString) => {
-//       const regex = /^\d{4}-\d{2}-\d{2}$/;
-//       return regex.test(dateString);
-//     };
-
-//     if (!isValidDateFormat(startDate) || !isValidDateFormat(endDate)) {
-//       return res.status(400).json({ error: 'Invalid date format for startDate or endDate' });
-//     }
-
-//     const approvedTimesheets = [];
-
-//     for (const employeeId of employeeIds) {
-//       const updateResult = await prisma.timesheet.updateMany({
-//         where: {
-//           EmployeeID: employeeId,
-//           Date: {
-//             gte: new Date(startDate),
-//             lte: new Date(endDate),
-//           },
-//         },
-//         data: {
-//           Status: 'approved',
-//         },
-//       });
-
-//       const updatedTimesheets = await prisma.timesheet.findMany({
-//         where: {
-//           EmployeeID: employeeId,
-//           Date: {
-//             gte: new Date(startDate),
-//             lte: new Date(endDate),
-//           },
-//         },
-//       });
-
-//       approvedTimesheets.push(...updatedTimesheets.filter((timesheet) => timesheet.Status === 'approved'));
-//     }
-
-//     res.json(approvedTimesheets);
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: 'Internal Server Error' });
-//   }
-// };
-// const approveTimesheet = async (req, res) => {
-//   try {
-//     const { employeeIds, startDate, endDate } = req.body;
-//     const isValidDateFormat = (dateString) => {
-//       const regex = /^\d{4}-\d{2}-\d{2}$/;
-//       return regex.test(dateString);
-//     };
-
-//     if (!isValidDateFormat(startDate) || !isValidDateFormat(endDate)) {
-//       return res.status(400).json({ error: 'Invalid date format for startDate or endDate' });
-//     }
-
-//     const approvedTimesheets = [];
-
-//     for (const employeeId of employeeIds) {
-//       const updateResult = await prisma.timesheet.updateMany({
-//         where: {
-//           EmployeeID: employeeId,
-//           Date: {
-//             gte: new Date(startDate),
-//             lte: new Date(endDate),
-//           },
-//         },
-//         data: {
-//           Status: 'approved',
-//         },
-//       });
-
-//       const updatedTimesheets = await prisma.timesheet.findMany({
-//         where: {
-//           EmployeeID: employeeId,
-//           Date: {
-//             gte: new Date(startDate),
-//             lte: new Date(endDate),
-//           },
-//         },
-//       });
-
-//       approvedTimesheets.push(...updatedTimesheets.filter((timesheet) => timesheet.Status === 'approved'));
-//     }
-
-//     res.json(approvedTimesheets);
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: 'Internal Server Error' });
-//   }
-// };
 
 const pendingTimesheet = async (req, res) => {
   try {
@@ -355,10 +260,12 @@ const pendingTimesheet = async (req, res) => {
 };
 
 
+
+
+
 const rejectTimesheet = async (req, res) => {
   try {
     const { employeeIds, startDate, endDate } = req.body;
-
 
     const isValidDateFormat = (dateString) => {
       const regex = /^\d{4}-\d{2}-\d{2}$/;
@@ -397,12 +304,57 @@ const rejectTimesheet = async (req, res) => {
       },
     });
 
+    
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: 'navathesiddhartha990@gmail.com',
+        pass: 'njwt woxj xjfr oqrv',
+      },
+    });
+
+    
+    const employees = await prisma.employee.findMany({
+      where: {
+        EmployeeID: {
+          in: employeeIds,
+        },
+      },
+      select: {
+        EmployeeID: true,
+        FirstName: true,
+        LastName: true,
+        Email: true,
+      },
+    });
+
+    
+    employees.forEach(async (employee) => {
+      const mailOptions = {
+        from: 'navathesiddhartha990@gmail.com',
+        to: employee.Email,
+        subject: 'Timesheet Rejected',
+        text: `Dear ${employee.FirstName} ${employee.LastName},\n\nYour timesheet has been rejected. Please review and contact your manager for more details.`,
+      };
+      
+
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          console.error(`Error sending email to ${employee.Email}:`, error);
+        } else {
+          console.log(`Email sent to ${employee.Email}:`, info.response);
+        }
+      });
+    });
+
     res.json(updatedTimesheets);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
+
 
 
 const getEmployeesUnderManagerOnSameProject = async (req, res) => {

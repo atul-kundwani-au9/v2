@@ -6,7 +6,7 @@ function authenticate(req, res, next) {
   const token = req.header('Authorization');
 
   if (!token) {
-    return res.status(401).json({ message: 'Unauthorized - No token provided' });
+    return next();
   }
 
   try {
@@ -14,7 +14,7 @@ function authenticate(req, res, next) {
     req.user = decoded;
     next();
   } catch (error) {
-    return res.status(401).json({ message: 'Unauthorized - Invalid token' });
+    return next();
   }
 }
 
