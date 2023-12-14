@@ -161,20 +161,7 @@ const createManagerEmployeesWithHours = async (req, res) => {
 };
 
 
-// async function getTimesheet(employeeId, startDate, endDate) {
-//  console.log(employeeId, startDate, endDate)
-//   const timesheets = await prisma.timesheet.findMany({
-//     where: {
-//       EmployeeID: employeeId,
-//       Date: {
-//         gte: new Date(startDate) ,
-//         lte: new Date(endDate),
-//       },
-//     },
-//   });
-//   console.log(timesheets)
-//   return timesheets;
-// }
+
 async function getTimesheet(employeeId, startDate, endDate) {
   try {
     console.log(employeeId, startDate, endDate);
@@ -245,6 +232,7 @@ const exportCSV = async (req, res) => {
 };
 
 const generateCSVData = async (managerId, startDate, endDate) => {
+  
   const managerEmployeesWithHours = await prisma.managerEmployee.findMany({
     where: {
       managerId: parseInt(managerId),
@@ -353,6 +341,7 @@ const getManagerData = async (req, res) => {
                   select: {
                     ProjectID: true,
                     ProjectName: true,
+                    ClientID: true,
                   },
                 },
               },
@@ -360,8 +349,7 @@ const getManagerData = async (req, res) => {
           },
         },
       },
-    });
-    
+    });    
     const clientList = [];
     const projectList = [];
     

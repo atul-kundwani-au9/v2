@@ -62,7 +62,7 @@ model Timesheet {
   Status      String
   HoursWorked Float
   Description String
-
+  RejectionComment String? 
   // Relationships
   Employee Employee @relation(fields: [EmployeeID], references: [EmployeeID])
   Project  Project  @relation(fields: [ProjectID], references: [ProjectID])
@@ -76,7 +76,7 @@ model ManagerEmployee {
   // Relationships
   manager  Employee @relation("ManagerEmployees_manager", fields: [managerId], references: [EmployeeID])
   employee Employee @relation("ManagerEmployees_employee", fields: [employeeId], references: [EmployeeID])
-
+   
   // Composite primary key
   @@id([employeeId, managerId])
 }

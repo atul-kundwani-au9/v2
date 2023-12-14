@@ -11,7 +11,7 @@ const { secretKey } = require('../config/config');
 const registerEmployee = async (req, res) => {
   try {
 
-    const { FirstName, LastName, Email, Password, Admin, EmployeeType } = req.body;
+    const { FirstName, LastName, Email, Password, Admin, EmployeeType,name } = req.body;
 
     const hashedPassword = await bcrypt.hash(Password, 10);
 
@@ -22,6 +22,7 @@ const registerEmployee = async (req, res) => {
       Password: hashedPassword,
       Admin,
       EmployeeType,
+      name
     });
 
 
@@ -188,7 +189,7 @@ const getEmployeewithManager = async (req, res) => {
     if (!employee) {
       return res.status(404).json({ error: 'Employee not found' });
     }
-
+ 
     res.json(employee);
   } catch (error) {
     console.error(error);
