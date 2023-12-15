@@ -62,7 +62,8 @@ model Timesheet {
   Status      String
   HoursWorked Float
   Description String
-  RejectionComment String? 
+  RejectionComment String  @default("")
+  Comment       String     @default("")
   // Relationships
   Employee Employee @relation(fields: [EmployeeID], references: [EmployeeID])
   Project  Project  @relation(fields: [ProjectID], references: [ProjectID])

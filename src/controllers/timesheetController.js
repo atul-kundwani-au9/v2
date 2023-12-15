@@ -19,7 +19,6 @@ const createTimesheets = async (req, res) => {
       timesheetEntries.map(async (entry) => {
         const { EmployeeID, ProjectID, entryDate, Status, Description, HoursWorked, EntryType } = entry;
 
-
         const existingEmployee = await prisma.employee.findUnique({
           where: {
             EmployeeID: EmployeeID,
@@ -31,6 +30,7 @@ const createTimesheets = async (req, res) => {
         }
         const date = new Date(entryDate);
         date.setHours(0, 0, 0, 0);
+       
         const timesheetData = {
           EmployeeID,
           ProjectID,
@@ -38,9 +38,14 @@ const createTimesheets = async (req, res) => {
           Status,
           HoursWorked,
           Description,
+          
         };
         console.log(timesheetData)
         const timesheet = await timesheetModel.createTimesheet(timesheetData);
+        // if (Comment) {
+        //   await timesheetModel.updateTimesheet(timesheet.id, { Comment });
+        //   timesheet.Comment = Comment; 
+        // }
         return timesheet;
 
       })
@@ -51,7 +56,83 @@ const createTimesheets = async (req, res) => {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
+
 };
+// const createTimesheets = async (req, res) => {
+//   try {
+//     const timesheetEntries = req.body.timesheets;
+
+//     if (!timesheetEntries || !Array.isArray(timesheetEntries)) {
+//       return res.status(400).json({ error: 'Invalid timesheetEntries in the request body' });
+//     }
+
+//     const results = await Promise.all(
+//       timesheetEntries.map(async (entry) => {
+//         const { EmployeeID, ProjectID, entryDate, Status, Description, HoursWorked, EntryType,  } = entry;
+
+//         const existingEmployee = await prisma.employee.findUnique({
+//           where: {
+//             EmployeeID: EmployeeID,
+//           },
+//         });
+
+//         if (!existingEmployee) {
+//           return { error: `Employee with ID ${EmployeeID} not found` };
+//         }
+
+//         const date = new Date(entryDate);
+//         date.setHours(0, 0, 0, 0);
+
+//         const existingTimesheet = await prisma.timesheet.findFirst({
+//           where: {
+//             EmployeeID: EmployeeID,
+//             ProjectID: ProjectID,
+//             Date: date,
+//           },
+//         });
+
+//         if (existingTimesheet) {
+         
+//           const updatedTimesheet = await prisma.timesheet.update({
+//             where: {
+//               id: existingTimesheet.id,
+//             },
+//             data: {
+//               Status,
+//               HoursWorked,
+//               Description,
+             
+//             },
+//           });
+
+//           return updatedTimesheet;
+//         } else {
+       
+//           const timesheetData = {
+//             EmployeeID,
+//             ProjectID,
+//             Date: date,
+//             Status,
+//             HoursWorked,
+//             Description,
+           
+//           };
+
+//           const timesheet = await prisma.timesheet.create({
+//             data: timesheetData,
+//           });
+
+//           return timesheet;
+//         }
+//       })
+//     );
+
+//     res.json(results.filter(Boolean));
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: 'Internal Server Error' });
+//   }
+// };
 const getAllTimesheetdata = async (req, res) => {
   try {
     const { EmployeeID, startDate, endDate } = req.body;
@@ -310,7 +391,7 @@ const rejectTimesheet = async (req, res) => {
       },
       data: {
         Status: 'rejected',
-        RejectionComment: rejectionComment,
+        RejectionComment: rejectionComment, 
       },
     });
 
@@ -326,7 +407,7 @@ const rejectTimesheet = async (req, res) => {
         Status: 'rejected',
       },
     });
-    
+
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
@@ -335,7 +416,6 @@ const rejectTimesheet = async (req, res) => {
       },
     });
 
-    
     const employees = await prisma.employee.findMany({
       where: {
         EmployeeID: {
@@ -348,14 +428,15 @@ const rejectTimesheet = async (req, res) => {
         LastName: true,
         Email: true,
       },
-    });    
+    });
+
     employees.forEach(async (employee) => {
       const mailOptions = {
         from: 'navathesiddhartha990@gmail.com',
         to: employee.Email,
         subject: 'Timesheet Rejected',
-        text: `Dear ${employee.FirstName} ${employee.LastName},\n\nYour timesheet has been rejected. Please review and contact your manager for more details.`,
-      };      
+        text: `Dear ${employee.FirstName} ${employee.LastName},\n\nYour timesheet has been rejected. Reason: ${rejectionComment || 'No comment provided'}. Please review and contact your manager for more details.`,
+      };
 
       transporter.sendMail(mailOptions, (error, info) => {
         if (error) {
@@ -366,7 +447,7 @@ const rejectTimesheet = async (req, res) => {
       });
     });
 
-    res.json({ message: 'Timesheets rejected successfully',updatedTimesheets});
+    res.json({ message: 'Timesheets rejected successfully', updatedTimesheets });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });

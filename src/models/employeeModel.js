@@ -19,8 +19,6 @@ const getEmployees = async () => {
   return prisma.employee.findMany();
 };
 
-
-
 const getEmployeeProfileById = async (employeeId) => {
   return prisma.employee.findUnique({
     where: {

@@ -1,7 +1,3 @@
-
-
-
-
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const bcrypt = require('bcrypt');
@@ -12,9 +8,7 @@ const registerEmployee = async (req, res) => {
   try {
 
     const { FirstName, LastName, Email, Password, Admin, EmployeeType,name } = req.body;
-
     const hashedPassword = await bcrypt.hash(Password, 10);
-
     const employee = await employeeModel.createEmployee({
       FirstName,
       LastName,
@@ -115,7 +109,6 @@ const getEmployeeProfile = async (req, res) => {
 
     const managerFirstName = employee.managingEmployees?.manager?.FirstName;
     const managerLastName = employee.managingEmployees?.manager?.LastName;
-
     const projects = employee.employeesManagedBy
       .map((relation) =>
         relation.employee.Timesheets.map((timesheet) => ({

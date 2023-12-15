@@ -131,8 +131,6 @@ const createTimesheet = async (data) => {
   return updatedTimesheet;
 
 };
-
-
 const getTimesheetsByEmployeeAndDateRange = async (employeeId, startDate, endDate) => {
   return prisma.timesheet.findMany({
     where: {

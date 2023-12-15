@@ -12,7 +12,6 @@ router.post('/employee', timesheetController.getTimesheetsByEmployeeAndDateRange
 router.post('/manager', timesheetController.getTimesheetsByManagerAndDateRange )
 router.post('/getEmployeesUnderManagerOnSameProject', authMiddleware.authenticate, timesheetController.getEmployeesUnderManagerOnSameProject);
 router.post('/getAllTimesheetdata',authMiddleware.authenticate, timesheetController.getAllTimesheetdata);
-
 module.exports = router;
 
 
