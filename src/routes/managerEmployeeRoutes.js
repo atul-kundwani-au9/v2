@@ -11,6 +11,8 @@ router.get('/getManagers', authMiddleware.authenticate, managerEmployeeControlle
 router.post('/csv-data', managerEmployeeController.exportCSV);
 router.post('/csv-employee',managerEmployeeController.exportEmployeeCSV)
 router.post('/csv-employees',managerEmployeeController.exportEmployeesCSV)
+router.post('/export-employees-excel', managerEmployeeController.exportEmployeesExcel)
+// router.post('/export-employees-csv',managerEmployeeController.exportEmployeeCSVs)
 router.get('/managerData/:managerId', authMiddleware.authenticate, managerEmployeeController.getManagerData);
 module.exports = router;
 

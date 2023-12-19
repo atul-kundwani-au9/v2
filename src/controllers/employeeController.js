@@ -19,7 +19,6 @@ const registerEmployee = async (req, res) => {
       name
     });
 
-
     res.json({ employee });
   } catch (error) {
     console.error(error);
@@ -142,7 +141,7 @@ const getEmployeeProfile = async (req, res) => {
       Projects: uniqueProjects,
     };
 
-    res.json(employeeProfile);
+    res.json({ status: 'success', message: 'Request successful', data: employeeProfile });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
@@ -183,7 +182,7 @@ const getEmployeewithManager = async (req, res) => {
       return res.status(404).json({ error: 'Employee not found' });
     }
  
-    res.json(employee);
+    res.json({ status: 'success', message: 'Request successful', data: employee });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });

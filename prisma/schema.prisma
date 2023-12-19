@@ -47,7 +47,7 @@ model Project {
   ProjectID   Int      @id @default(autoincrement())
   ProjectName String
   ClientID    Int
-
+   
   // Relationships
   Client     Client      @relation(fields: [ClientID], references: [ClientID])
   Timesheets Timesheet[]
