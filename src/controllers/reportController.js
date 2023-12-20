@@ -37,13 +37,17 @@ const getProjectReport = async (req, res) => {
       },
     });
     
-    res.json(projectReport);
+    const response = {
+      status: 'success',
+      data: projectReport,
+    };
+
+    res.json(response);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ status: 'error', message: 'Internal Server Error' });
   }
 };
-
 const getEmployeeReport = async (req, res) => {
   try {
     const employeeId = parseInt(req.params.employeeId);
@@ -56,10 +60,15 @@ const getEmployeeReport = async (req, res) => {
         Project: true,
       },
     });    
-    res.json(employeeReport);
+    const response = {
+      status: 'success',
+      data: employeeReport,
+    };
+
+    res.json(response);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ status: 'error', message: 'Internal Server Error' });
   }
 };
 

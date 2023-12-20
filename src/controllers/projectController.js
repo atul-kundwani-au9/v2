@@ -9,7 +9,7 @@ const createProject = async (req, res) => {
       ClientID,
     });
    
-    res.json(project);
+    res.json({ status: 'success', message: 'Project created successfully', data: project });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
@@ -20,7 +20,8 @@ const getProjectList = async (req, res) => {
   try {
     const projects = await projectModel.getProjects();
     
-    res.json(projects);
+    
+    res.json({ status: 'success', message: 'Projects retrieved successfully', data: projects });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });

@@ -8,7 +8,7 @@ const createClient = async (req, res) => {
       ContactPerson,
       ContactEmail,
     });
-    res.json(client);
+    res.json({ status: 'success', message: 'Client created successfully', data: client });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
@@ -18,7 +18,7 @@ const createClient = async (req, res) => {
 const getClientList = async (req, res) => {
   try {
     const clients = await clientModel.getClients();
-    res.json(clients);
+    res.json({ status: 'success',  data: clients });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });

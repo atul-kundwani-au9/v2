@@ -19,7 +19,7 @@ const registerEmployee = async (req, res) => {
       name
     });
 
-    res.json({ employee });
+    res.json({ status: 'success', message: 'Employee registered successfully', data: employee });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
