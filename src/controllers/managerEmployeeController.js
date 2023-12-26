@@ -114,7 +114,6 @@ const getManagerProfile = async (req, res) => {
   }
 };
 
-
 const createManagerEmployeesWithHours = async (req, res) => {
   try {
     const { managerId, startDate, endDate } = req.body;
@@ -136,7 +135,7 @@ const createManagerEmployeesWithHours = async (req, res) => {
       for (const emp of emps) {
         let obj = {
           ...emp,
-          status: 'pending', 
+          status: 'approved', 
         };
         let timedata = [];
         
@@ -144,9 +143,10 @@ const createManagerEmployeesWithHours = async (req, res) => {
           const data = await getTimesheet(emp.EmployeeID, startDate, endDate);
           timedata = data;
 
-          const isApproved = timedata.every((element) => element.Status === 'approved');
-          obj.status = isApproved ? 'approved' : 'pending';
-
+          // obj.status = timedata.some((element) => element.Status !== 'approved') ? 'pending' : 'approved';
+          if (timedata.every((element) => element.Status === 'rejected')) {
+            obj.status = 'pending';
+          }
           timedata.forEach(element => {
             obj['hours'] = (obj['hours'] || 0) + (element.HoursWorked || 0);
           });
@@ -698,7 +698,6 @@ const getWeekData = async (employee, startDate, endDate, weekNumber) => {
   return weekData;
 };
 
-
 const getMonth = (startDate) => {
   return format(new Date(startDate), 'MMMM', { locale: enUS });
 };
@@ -854,47 +853,6 @@ const getMonth = (startDate) => {
 //   return format(new Date(startDate), 'MMMM', { locale: enUS });
 // };
 
-// const exportEmployeesExcel = async (req, res) => {
-//   try {
-//     let { employeeId, employeeIds, startDate, endDate } = req.body;
-
-//     if (!employeeIds) {
-//       employeeIds = [employeeId];
-//     }
-
-//     const employeesData = await generateEmployeesExcelData(employeeIds, startDate, endDate);
-//     const currentDate = new Date().toLocaleDateString('en-IN');
-//     const formattedDate = currentDate.replace(/\//g, '-');
-//     const fileName = `employees-report-${formattedDate}.xlsx`;
-//     const filePath = `public/${fileName}`;
-    
-//     // Construct Excel data
-//     let excelData = 'Name\tMonth\tWeek\tActual Hours\t\tBillable Hours\t\tTotal Actual Hours\tTotal Billable Hours\tComments\n';
-
-//     employeesData.forEach((employeeData) => {
-//       for (let weekNumber = 1; weekNumber <= 5; weekNumber++) {
-//         const weekData = employeeData[`Week ${weekNumber}`];
-
-//         // Add a row for each week
-//         excelData += `${employeeData.Name}\t${employeeData.Month}\tWeek ${weekNumber}\t${
-//           weekData ? weekData['Actual Hours'] : ''
-//         }\t\t${weekData ? weekData['Billable Hours'] : ''}\t\t\t\t\t${
-//           employeeData.Comments
-//         }\n`;
-//       }
-//     });
-   
-//     // Write data to file
-//     const fs = require('fs');
-//     fs.writeFileSync(filePath, excelData, 'utf-8');
-
-//     res.download(filePath, fileName);
-//     res.status(200).json(employeesData);
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: 'Internal Server Error' });
-//   }
-// };
 
 module.exports = {
   exportEmployeeCSVs,
