@@ -743,26 +743,21 @@ const generateEmployeeCSVDatas = async (employeeIds, startDate, endDate) => {
     }
 
     const timesheets = await getEmployeeTimesheets(employee, startDate, endDate);
-
-    // Declare a new employeeData object for each employee
+   
     const employeeData = {
       'Name': `${employee.FirstName} ${employee.LastName}`,
       'Month': getMonth(startDate),
-    };
-    
+    };    
     for (let weekNumber = 1; weekNumber <= 5; weekNumber++) {
       const weekData = getWeekData(timesheets, weekNumber);
       employeeData[`Week ${weekNumber} Actual Hours`] = weekData['Actual Hours'];
       employeeData[`Week ${weekNumber} Billable Hours`] = weekData['Billable Hours'];
     }
-
     const totalActualHours = calculateTotalActualHours(timesheets);
     const totalBillableHours = calculateTotalBillableHours(timesheets);
-
     employeeData['Total Actual Hours'] = totalActualHours;
     employeeData['Total Billable Hours'] = totalBillableHours;
     employeeData['Comments'] = 'Your comments here';
-
     employeesData.push(employeeData);
   }
 
@@ -786,6 +781,8 @@ const getEmployeeTimesheets = async (employee, startDate, endDate) => {
 };
 
 const getWeekData = (timesheets, weekNumber) => {
+  console.log(`Timesheets for Week ${weekNumber}: `, timesheets);
+
   const weekData = {
     'Week': weekNumber,
     'Actual Hours': 0,
@@ -806,6 +803,7 @@ const getWeekData = (timesheets, weekNumber) => {
 };
 
 const calculateTotalActualHours = (timesheets) => {
+  
   const totalActualHours = timesheets.reduce((total, timesheet) => total + timesheet.ActualHours, 0);
   
   return totalActualHours;
