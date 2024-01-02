@@ -194,6 +194,66 @@ const getManagerReport = async (req, res) => {
 };
 
 
+// const getManagerReport = async (req, res) => {
+//   try {
+//     const { managerId, startDate, endDate } = req.body;
+//     const managedEmployees = await prisma.managerEmployee.findMany({
+//       where: {
+//         managerId: parseInt(managerId),
+//       },
+//       select: {
+//         employeeId: true,
+//       },
+//     });
+
+//     const managedEmployeeIds = managedEmployees.map((entry) => entry.employeeId);
+
+//     const submittedEmployees = [];
+//     const notSubmittedEmployees = [];
+
+//     // Iterate through each day in the date range
+//     for (let currentDate = new Date(startDate); currentDate <= new Date(endDate); currentDate.setDate(currentDate.getDate() + 1)) {
+//       const isSubmitted = await prisma.employee.findMany({
+//         where: {
+//           EmployeeID: {
+//             in: managedEmployeeIds,
+//           },
+//           Timesheets: {
+//             some: {
+//               Date: currentDate,
+//               Status: 'In Progress', // Change to your actual 'In Progress' status
+//             },
+//           },
+//         },
+//       });
+
+//       if (isSubmitted.length > 0) {
+//         submittedEmployees.push({
+//           date: currentDate.toISOString().split('T')[0], // Format date as YYYY-MM-DD
+//         });
+//       } else {
+//         notSubmittedEmployees.push({
+//           date: currentDate.toISOString().split('T')[0], // Format date as YYYY-MM-DD
+//         });
+//       }
+//     }
+
+//     const response = {
+//       submittedEmployees: submittedEmployees,
+//       notSubmittedEmployees: notSubmittedEmployees,
+//       totalSubmitted: submittedEmployees.length,
+//       totalNotSubmitted: notSubmittedEmployees.length,
+//       status: 'success',
+//     };
+
+//     res.json(response);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: 'Internal Server Error' });
+//   }
+// };
+
+
 module.exports = {
   getManagerReport,
   getClientReport,
