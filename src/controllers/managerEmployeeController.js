@@ -680,6 +680,51 @@ const exportEmployeeCSVs = async (req, res) => {
   }
 };
 
+// const generateEmployeeCSVDatas = async (employeeIds, startDate, endDate) => {
+//   if (!Array.isArray(employeeIds)) {
+//     employeeIds = [employeeIds];
+//   }
+//   const employeesData = [];
+//   for (const employeeId of employeeIds) {
+//     const employee = await prisma.employee.findUnique({
+//       where: {
+//         EmployeeID: parseInt(employeeId),
+//       },
+//     });
+
+//     if (!employee) {
+//       console.error(`Employee with ID ${employeeId} not found.`);
+//       continue; 
+//     }
+
+//     const timesheets = await getEmployeeTimesheets(employee, startDate, endDate);
+//     const employeeData = {
+//       'Name': `${employee.FirstName} ${employee.LastName}`,
+//       'Month': getMonth(startDate),
+//     };
+
+//     for (let weekNumber = 1; weekNumber <= 5; weekNumber++) {
+//       const weekData = getWeekData(timesheets, weekNumber);
+//       employeeData[`Week ${weekNumber} Actual Hours`] = weekData['Actual Hours'];
+//       employeeData[`Week ${weekNumber} Billable Hours`] = weekData['Billable Hours'];
+//     }
+
+//     const totalActualHours = calculateTotalActualHours(timesheets);
+//     const totalBillableHours = calculateTotalBillableHours(timesheets);
+
+//     employeeData['Total Actual Hours'] = totalActualHours;
+//     employeeData['Total Billable Hours'] = totalBillableHours;
+//     employeeData['Comments'] = 'Your comments here';
+//     // console.log(`Employee: ${employeeData.Name}`);
+//     // console.log(`Total Actual Hours: ${totalActualHours}`);
+//     // console.log(`Total Billable Hours: ${totalBillableHours}`);
+
+//     employeesData.push(employeeData);
+//   }
+
+//   console.log(employeesData);
+//   return employeesData;
+// };
 const generateEmployeeCSVDatas = async (employeeIds, startDate, endDate) => {
   if (!Array.isArray(employeeIds)) {
     employeeIds = [employeeIds];
@@ -698,11 +743,13 @@ const generateEmployeeCSVDatas = async (employeeIds, startDate, endDate) => {
     }
 
     const timesheets = await getEmployeeTimesheets(employee, startDate, endDate);
+
+    // Declare a new employeeData object for each employee
     const employeeData = {
       'Name': `${employee.FirstName} ${employee.LastName}`,
       'Month': getMonth(startDate),
     };
-
+    
     for (let weekNumber = 1; weekNumber <= 5; weekNumber++) {
       const weekData = getWeekData(timesheets, weekNumber);
       employeeData[`Week ${weekNumber} Actual Hours`] = weekData['Actual Hours'];
@@ -715,9 +762,6 @@ const generateEmployeeCSVDatas = async (employeeIds, startDate, endDate) => {
     employeeData['Total Actual Hours'] = totalActualHours;
     employeeData['Total Billable Hours'] = totalBillableHours;
     employeeData['Comments'] = 'Your comments here';
-    // console.log(`Employee: ${employeeData.Name}`);
-    // console.log(`Total Actual Hours: ${totalActualHours}`);
-    // console.log(`Total Billable Hours: ${totalBillableHours}`);
 
     employeesData.push(employeeData);
   }
@@ -725,6 +769,7 @@ const generateEmployeeCSVDatas = async (employeeIds, startDate, endDate) => {
   console.log(employeesData);
   return employeesData;
 };
+
 
 const getEmployeeTimesheets = async (employee, startDate, endDate) => {
   const timesheets = await prisma.timesheet.findMany({
