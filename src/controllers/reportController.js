@@ -131,6 +131,68 @@ const getEmployeeReport = async (req, res) => {
 //     res.status(500).json({ error: 'Internal Server Error' });
 //   }
 // };
+// const getManagerReport = async (req, res) => {
+//   try {
+//     const { managerId, startDate, endDate } = req.body;
+//     const managedEmployees = await prisma.managerEmployee.findMany({
+//       where: {
+//         managerId: parseInt(managerId),
+//       },
+//       select: {
+//         employeeId: true,
+//       },
+//     });
+
+//     const managedEmployeeIds = managedEmployees.map((entry) => entry.employeeId);
+//     const submittedEmployees = await prisma.employee.findMany({
+//       where: {
+//         EmployeeID: {
+//           in: managedEmployeeIds,
+//         },
+//         Timesheets: {
+//           some: {
+//             Date: {
+//               gte: new Date(startDate),
+//               lte: new Date(endDate),
+//             },
+//             Status: 'In Progress',
+//           },
+//         },
+//       },
+//     });
+//     console.log(submittedEmployees)
+//     const notSubmittedEmployees = await prisma.employee.findMany({
+//       where: {
+//         EmployeeID: {
+//           in: managedEmployeeIds,
+//         },
+//         Timesheets: {
+//           none: {
+//             Date: {
+//               gte: new Date(startDate),
+//               lte: new Date(endDate),
+//             },
+//             Status: 'pending',
+//           },
+//         },
+//       },
+//     });
+
+//     const response = {
+//       submittedEmployees: submittedEmployees,
+//       notSubmittedEmployees: notSubmittedEmployees,
+//       totalSubmitted: submittedEmployees.length,
+//       totalNotSubmitted: notSubmittedEmployees.length,
+//       status: 'success',
+//     };
+
+//     res.json(response);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: 'Internal Server Error' });
+//   }
+// };
+
 const getManagerReport = async (req, res) => {
   try {
     const { managerId, startDate, endDate } = req.body;
@@ -144,39 +206,33 @@ const getManagerReport = async (req, res) => {
     });
 
     const managedEmployeeIds = managedEmployees.map((entry) => entry.employeeId);
-    const submittedEmployees = await prisma.employee.findMany({
-      where: {
-        EmployeeID: {
-          in: managedEmployeeIds,
-        },
-        Timesheets: {
-          some: {
-            Date: {
-              gte: new Date(startDate),
-              lte: new Date(endDate),
+
+    const employeesReport = await Promise.all(
+      managedEmployeeIds.map(async (employeeId) => {
+        const submittedTimesheets = await prisma.employee.findMany({
+          where: {
+            EmployeeID: employeeId,
+            Timesheets: {
+              some: {
+                Date: {
+                  gte: new Date(startDate),
+                  lte: new Date(endDate),
+                },
+                Status: 'In Progress',
+              },
             },
-            Status: 'In Progress',
           },
-        },
-      },
-    });
-    console.log(submittedEmployees)
-    const notSubmittedEmployees = await prisma.employee.findMany({
-      where: {
-        EmployeeID: {
-          in: managedEmployeeIds,
-        },
-        Timesheets: {
-          none: {
-            Date: {
-              gte: new Date(startDate),
-              lte: new Date(endDate),
-            },
-            Status: 'pending',
-          },
-        },
-      },
-    });
+        });
+
+        return {
+          employeeId,
+          submitted: submittedTimesheets.length > 0,
+        };
+      })
+    );
+
+    const submittedEmployees = employeesReport.filter((employee) => employee.submitted);
+    const notSubmittedEmployees = employeesReport.filter((employee) => !employee.submitted);
 
     const response = {
       submittedEmployees: submittedEmployees,
@@ -192,7 +248,6 @@ const getManagerReport = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
-
 
 // const getManagerReport = async (req, res) => {
 //   try {
