@@ -354,6 +354,7 @@ const rejectTimesheet = async (req, res) => {
         RejectionComment: rejectionComment, 
       },
     });
+    
 
     const updatedTimesheets = await prisma.timesheet.findMany({
       where: {
