@@ -144,7 +144,6 @@ const getManagerReport = async (req, res) => {
     });
 
     const managedEmployeeIds = managedEmployees.map((entry) => entry.employeeId);
-
     const submittedEmployees = await prisma.employee.findMany({
       where: {
         EmployeeID: {
@@ -156,12 +155,12 @@ const getManagerReport = async (req, res) => {
               gte: new Date(startDate),
               lte: new Date(endDate),
             },
-            Status: 'submitted',
+            Status: 'In Progress',
           },
         },
       },
     });
-
+    console.log(submittedEmployees)
     const notSubmittedEmployees = await prisma.employee.findMany({
       where: {
         EmployeeID: {
@@ -173,7 +172,7 @@ const getManagerReport = async (req, res) => {
               gte: new Date(startDate),
               lte: new Date(endDate),
             },
-            Status: 'submitted',
+            Status: 'pending',
           },
         },
       },

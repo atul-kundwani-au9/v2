@@ -11,7 +11,7 @@ app.use(bodyParser.json());
 
 const createTimesheets = async (req, res) => {
   try {
-    const timesheetEntries = req.body.timesheets;
+    const timesheetEntries = req.body;
     if (!timesheetEntries || !Array.isArray(timesheetEntries)) {
       return res.status(400).json({ error: 'Invalid timesheetEntries in the request body' });
     }
