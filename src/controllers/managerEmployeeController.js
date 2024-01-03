@@ -293,7 +293,7 @@ const calculateTotalHours = async (employee, startDate, endDate) => {
       },
     });
   
-    const totalHours = timesheets.reduce((total, timesheet) => total + timesheet.HoursWorked, 0);  
+    const totalHours = timesheets.reduce((total, timesheet) => total + parseFloat(timesheet.HoursWorked), 0);  
     return totalHours;
   };
 
@@ -311,7 +311,7 @@ const calculateTotalClient = async (employee, startDate, endDate) => {
   let data_client = {};
   timesheets.forEach((row) => {
     const clientId = row.clientId;
-    const hoursWorked = row.hours;    
+    const hoursWorked = parseFloat(row.hours);    
     if (clientId !== undefined) {
       if (!data_client[clientId]) {
         data_client[clientId] = 0;
