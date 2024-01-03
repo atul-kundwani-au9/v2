@@ -218,7 +218,7 @@ const getManagerReport = async (req, res) => {
                   gte: new Date(startDate),
                   lte: new Date(endDate),
                 },
-                Status: 'In Progress',
+                Status: 'pending',
               },
             },
           },
