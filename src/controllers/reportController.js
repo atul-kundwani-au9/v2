@@ -230,10 +230,8 @@ const getManagerReport = async (req, res) => {
         };
       })
     );
-
     const submittedEmployees = employeesReport.filter((employee) => employee.submitted);
     const notSubmittedEmployees = employeesReport.filter((employee) => !employee.submitted);
-
     const response = {
       submittedEmployees: submittedEmployees,
       notSubmittedEmployees: notSubmittedEmployees,
