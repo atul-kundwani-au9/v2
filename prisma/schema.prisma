@@ -21,7 +21,8 @@ model Employee {
   // Default Values
   DefaultHours    Float    @default(8)                 
   DefaultProject  String   @default("")  
-  DefaultClient   String   @default("")   
+  DefaultClient   String   @default("")  
+  DefaultProjectId String  @default("") 
 // Derived field for full name
   name            String   @map("concat(FirstName, ' ', LastName)")
 

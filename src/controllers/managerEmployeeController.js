@@ -507,144 +507,7 @@ const generateEmployeesCSVData = async (employeeIds, startDate, endDate) => {
   console.log(employeesData);
   return employeesData;
 };
-// const exportEmployeeCSVs = async (req, res) => {
-//   try {
-//     const { employeeId, startDate, endDate } = req.body;
-//     const employeeData = await generateEmployeeCSVDatas(employeeId, startDate, endDate);
-//     const currentDate = new Date().toLocaleDateString('en-IN');
-//     const formattedDate = currentDate.replace(/\//g, '-');
-//     const fileName = `employee-report-${formattedDate}.csv`;
-//     const filePath = `public/${fileName}`;
 
-//     const csvWriter = createCsvWriter({
-//       path: filePath,
-//       header: [
-//         { id: 'Name', title: 'Name' },
-//         { id: 'Month', title: 'Month' },
-//         { id: 'Week 1', title: 'Week 1' },
-//         { id: 'Week 2', title: 'Week 2' },
-//         { id: 'Week 3', title: 'Week 3' },
-//         { id: 'Week 4', title: 'Week 4' },
-//         { id: 'Week 5', title: 'Week 5' },
-//         { id: 'Total Actual Hours', title: 'Total Actual Hours' },
-//         { id: 'Total Billable Hours', title: 'Total Billable Hours' },
-//         { id: 'Comments', title: 'Comments' },
-//       ],
-//     });
-
-//     await csvWriter.writeRecords(employeeData);
-//     res.download(filePath, fileName);
-//     res.status(200).json(employeeData);
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: 'Internal Server Error' });
-//   }
-// };
-
-// const generateEmployeeCSVDatas = async (employeeIds, startDate, endDate) => {
-//   if (!Array.isArray(employeeIds)) {
-   
-//     employeeIds = [employeeIds];
-//   }
-//   const employeesData = [];
-//   for (const employeeId of employeeIds) {
-//     const employee = await prisma.employee.findUnique({
-//       where: {
-//         EmployeeID: parseInt(employeeId),
-//       },
-//     });
-
-//     if (!employee) {
-//       console.error(`Employee with ID ${employeeId} not found.`);
-//       continue; 
-//     }
-
-//     const employeeData = {
-//       'Name': `${employee.FirstName} ${employee.LastName}`,
-//       'Month': getMonth(startDate),
-//     };
-    
-//     for (let weekNumber = 1; weekNumber <= 5; weekNumber++) {
-//       const weekData = await getWeekData(employee, startDate, endDate, weekNumber);
-//       employeeData[`Week ${weekNumber} Actual Hours`] = weekData['Actual Hours'];
-//       employeeData[`Week ${weekNumber} Billable Hours`] = weekData['Billable Hours'];
-//     }
-
-//     const totalActualHours = await calculateTotalActualHours(employee, startDate, endDate);
-//     const totalBillableHours = await calculateTotalBillableHours(employee, startDate, endDate);
-
-//     employeeData['Total Actual Hours'] = totalActualHours;
-//     employeeData['Total Billable Hours'] = totalBillableHours;
-//     employeeData['Comments'] = 'Your comments here';
-
-//     employeesData.push(employeeData);
-//   }
-
-//   console.log(employeesData);
-//   return employeesData;
-// };
-// const calculateTotalActualHours = async (employee, startDate, endDate) => {
-//   const timesheets = await prisma.timesheet.findMany({
-//     where: {
-//       EmployeeID: employee.EmployeeID,
-//       Date: {
-//         gte: new Date(startDate),
-//         lte: new Date(endDate),
-//       },
-//     },
-//   });
-
-//   const totalActualHours = timesheets.reduce((total, timesheet) => total + timesheet.ActualHours, 0);
-//   return totalActualHours;
-// };
-
-// const calculateTotalBillableHours = async (employee, startDate, endDate) => {
-//   const timesheets = await prisma.timesheet.findMany({
-//     where: {
-//       EmployeeID: employee.EmployeeID,
-//       Date: {
-//         gte: new Date(startDate),
-//         lte: new Date(endDate),
-//       },
-//     },
-//   });
-
-//   const totalBillableHours = timesheets.reduce((total, timesheet) => total + timesheet.BillableHours, 0);
-//   return totalBillableHours;
-// };
-
-// const getWeekData = async (employee, startDate, endDate, weekNumber) => {
-//   const timesheets = await prisma.timesheet.findMany({
-//     where: {
-//       EmployeeID: employee.EmployeeID,
-//       Date: {
-//         gte: new Date(startDate),
-//         lte: new Date(endDate),
-//       },
-//     },
-//   });
-
-//   const weekData = {
-//     'Week': weekNumber,
-//     'Actual Hours': 0,
-//     'Billable Hours': 0,
-//   };
-
-//   timesheets.forEach((timesheet) => {
-//     const timesheetWeekNumber = getISOWeek(timesheet.Date);
-
-//     if (timesheetWeekNumber === weekNumber) {
-//       weekData['Actual Hours'] += timesheet.ActualHours;
-//       weekData['Billable Hours'] += timesheet.BillableHours;
-//     }
-//   });
-
-//   return weekData;
-// };
-
-// const getMonth = (startDate) => {
-//   return format(new Date(startDate), 'MMMM', { locale: enUS });
-// };
 const exportEmployeeCSVs = async (req, res) => {
   try {
     const { employeeId, startDate, endDate } = req.body;
@@ -669,9 +532,7 @@ const exportEmployeeCSVs = async (req, res) => {
         { id: 'Comments', title: 'Comments' },
       ],
     });
-
-    await csvWriter.writeRecords(employeeData);
-    
+    await csvWriter.writeRecords(employeeData);    
     res.download(filePath, fileName);
     res.status(200).json(employeeData);
   } catch (error) {
@@ -680,51 +541,6 @@ const exportEmployeeCSVs = async (req, res) => {
   }
 };
 
-// const generateEmployeeCSVDatas = async (employeeIds, startDate, endDate) => {
-//   if (!Array.isArray(employeeIds)) {
-//     employeeIds = [employeeIds];
-//   }
-//   const employeesData = [];
-//   for (const employeeId of employeeIds) {
-//     const employee = await prisma.employee.findUnique({
-//       where: {
-//         EmployeeID: parseInt(employeeId),
-//       },
-//     });
-
-//     if (!employee) {
-//       console.error(`Employee with ID ${employeeId} not found.`);
-//       continue; 
-//     }
-
-//     const timesheets = await getEmployeeTimesheets(employee, startDate, endDate);
-//     const employeeData = {
-//       'Name': `${employee.FirstName} ${employee.LastName}`,
-//       'Month': getMonth(startDate),
-//     };
-
-//     for (let weekNumber = 1; weekNumber <= 5; weekNumber++) {
-//       const weekData = getWeekData(timesheets, weekNumber);
-//       employeeData[`Week ${weekNumber} Actual Hours`] = weekData['Actual Hours'];
-//       employeeData[`Week ${weekNumber} Billable Hours`] = weekData['Billable Hours'];
-//     }
-
-//     const totalActualHours = calculateTotalActualHours(timesheets);
-//     const totalBillableHours = calculateTotalBillableHours(timesheets);
-
-//     employeeData['Total Actual Hours'] = totalActualHours;
-//     employeeData['Total Billable Hours'] = totalBillableHours;
-//     employeeData['Comments'] = 'Your comments here';
-//     // console.log(`Employee: ${employeeData.Name}`);
-//     // console.log(`Total Actual Hours: ${totalActualHours}`);
-//     // console.log(`Total Billable Hours: ${totalBillableHours}`);
-
-//     employeesData.push(employeeData);
-//   }
-
-//   console.log(employeesData);
-//   return employeesData;
-// };
 const generateEmployeeCSVDatas = async (employeeIds, startDate, endDate) => {
   if (!Array.isArray(employeeIds)) {
     employeeIds = [employeeIds];
@@ -743,28 +559,27 @@ const generateEmployeeCSVDatas = async (employeeIds, startDate, endDate) => {
     }
 
     const timesheets = await getEmployeeTimesheets(employee, startDate, endDate);
-   
+    console.log('Timesheets for calculating total actual hours: ', timesheets);
     const employeeData = {
       'Name': `${employee.FirstName} ${employee.LastName}`,
       'Month': getMonth(startDate),
     };    
+    console.log(timesheets , "log")
     for (let weekNumber = 1; weekNumber <= 5; weekNumber++) {
-      const weekData = getWeekData(timesheets, weekNumber);
+      const weekData = getWeekData(timesheets, weekNumber,employee);
       employeeData[`Week ${weekNumber} Actual Hours`] = weekData['Actual Hours'];
       employeeData[`Week ${weekNumber} Billable Hours`] = weekData['Billable Hours'];
     }
-    const totalActualHours = calculateTotalActualHours(timesheets);
+    const totalActualHours = calculateTotalActualHours(employee, startDate, endDate);
     const totalBillableHours = calculateTotalBillableHours(timesheets);
     employeeData['Total Actual Hours'] = totalActualHours;
     employeeData['Total Billable Hours'] = totalBillableHours;
     employeeData['Comments'] = 'Your comments here';
     employeesData.push(employeeData);
   }
-
-  console.log(employeesData);
+ 
   return employeesData;
 };
-
 
 const getEmployeeTimesheets = async (employee, startDate, endDate) => {
   const timesheets = await prisma.timesheet.findMany({
@@ -780,8 +595,8 @@ const getEmployeeTimesheets = async (employee, startDate, endDate) => {
   return timesheets;
 };
 
-const getWeekData = (timesheets, weekNumber) => {
-  console.log(`Timesheets for Week ${weekNumber}: `, timesheets);
+const getWeekData = (timesheets, weekNumber, employee) => {
+  // console.log(`Timesheets for Week ${weekNumber}: `, timesheets);
 
   const weekData = {
     'Week': weekNumber,
@@ -790,11 +605,13 @@ const getWeekData = (timesheets, weekNumber) => {
   };
 
   timesheets.forEach((timesheet) => {
+    // console.log('Timesheet values: ', timesheet.ActualHours, timesheet.BillableHours);
     const timesheetWeekNumber = getISOWeek(timesheet.Date);
 
     if (timesheetWeekNumber === weekNumber) {
-      weekData['Actual Hours'] += timesheet.ActualHours;
-      weekData['Billable Hours'] += timesheet.BillableHours;
+      console.log(`Timesheet for Week ${weekNumber}: `, timesheet);
+      weekData['Actual Hours'] += parseFloat(employee.DefaultHours) || 8;
+      weekData['Billable Hours'] += parseFloat(timesheet.HoursWorked) || 0;
     }
   });
   // console.log(`Week ${weekNumber} Actual Hours: ${weekData['Actual Hours']}`);
@@ -802,15 +619,23 @@ const getWeekData = (timesheets, weekNumber) => {
   return weekData;
 };
 
-const calculateTotalActualHours = (timesheets) => {
+// const calculateTotalActualHours = (timesheets,employee,startDate,endDate) => {
   
-  const totalActualHours = timesheets.reduce((total, timesheet) => total + timesheet.ActualHours, 0);
+//   const totalActualHours = timesheets.reduce((total, timesheet) => total + parseFloat(employee.DefaultHours),0)
   
+//   return totalActualHours;
+// };
+const calculateTotalActualHours = (employee, startDate, endDate) => {
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  const daysDifference = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+  const totalActualHours = (parseFloat(employee.DefaultHours ) || 8) * daysDifference;
+  console.log(totalActualHours)
   return totalActualHours;
 };
 
 const calculateTotalBillableHours = (timesheets) => {
-  const totalBillableHours = timesheets.reduce((total, timesheet) => total + timesheet.BillableHours, 0);
+  const totalBillableHours = timesheets.reduce((total, timesheet) => total + parseFloat(timesheet.HoursWorked),0)
   return totalBillableHours;
 };
 // const calculateTotalActualHours = (timesheets) => {
