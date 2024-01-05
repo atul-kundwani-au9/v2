@@ -7,9 +7,12 @@ CREATE TABLE `Employee` (
     `Password` VARCHAR(191) NOT NULL,
     `Admin` BOOLEAN NOT NULL,
     `EmployeeType` VARCHAR(191) NOT NULL,
+    `clientId` INTEGER NULL,
     `DefaultHours` DOUBLE NOT NULL DEFAULT 8,
     `DefaultProject` VARCHAR(191) NOT NULL DEFAULT '',
     `DefaultClient` VARCHAR(191) NOT NULL DEFAULT '',
+    `DefaultProjectId` VARCHAR(191) NOT NULL DEFAULT '',
+    `concat(FirstName, ' ', LastName)` VARCHAR(191) NOT NULL,
 
     UNIQUE INDEX `Employee_Email_key`(`Email`),
     PRIMARY KEY (`EmployeeID`)
@@ -43,6 +46,8 @@ CREATE TABLE `Timesheet` (
     `Status` VARCHAR(191) NOT NULL,
     `HoursWorked` DOUBLE NOT NULL,
     `Description` VARCHAR(191) NOT NULL,
+    `RejectionComment` VARCHAR(191) NOT NULL DEFAULT '',
+    `Comment` VARCHAR(191) NOT NULL DEFAULT '',
 
     PRIMARY KEY (`TimesheetID`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;

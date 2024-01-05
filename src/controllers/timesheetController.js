@@ -8,6 +8,7 @@ const router = require('../routes/timesheetRoutes');
 const app = express();
 const nodemailer = require('nodemailer');
 app.use(bodyParser.json());
+const moment = require('moment-timezone');
 
 const createTimesheets = async (req, res) => {
   try {
@@ -28,7 +29,8 @@ const createTimesheets = async (req, res) => {
         if (!existingEmployee) {
           return { error: `Employee with ID ${EmployeeID} not found` };
         }
-        const date = new Date(entryDate);
+        // const date = new Date(entryDate);
+        const date = moment(entryDate).toDate()
         date.setHours(0, 0, 0, 0);
        
         const timesheetData = {
@@ -38,6 +40,7 @@ const createTimesheets = async (req, res) => {
           Status,
           HoursWorked,
           Description,
+          Comment: Comment,
           
         };
         console.log(timesheetData)
@@ -46,6 +49,7 @@ const createTimesheets = async (req, res) => {
         //   await timesheetModel.updateTimesheet(timesheet.id, { Comment });
         //   timesheet.Comment = Comment; 
         // }
+       
         return { status: 'success', message: 'Timesheet created successfully', data: timesheet };
       })
     );

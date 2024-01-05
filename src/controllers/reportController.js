@@ -193,6 +193,7 @@ const getEmployeeReport = async (req, res) => {
 //   }
 // };
 
+
 const getManagerReport = async (req, res) => {
   try {
     const { managerId, startDate, endDate } = req.body;
@@ -202,16 +203,20 @@ const getManagerReport = async (req, res) => {
       },
       select: {
         employeeId: true,
+        employee: {
+          select: {
+            FirstName: true,
+            LastName: true,
+          },
+        },
       },
     });
 
-    const managedEmployeeIds = managedEmployees.map((entry) => entry.employeeId);
-
     const employeesReport = await Promise.all(
-      managedEmployeeIds.map(async (employeeId) => {
+      managedEmployees.map(async (managedEmployee) => {
         const submittedTimesheets = await prisma.employee.findMany({
           where: {
-            EmployeeID: employeeId,
+            EmployeeID: managedEmployee.employeeId,
             Timesheets: {
               some: {
                 Date: {
@@ -228,13 +233,17 @@ const getManagerReport = async (req, res) => {
         });
 
         return {
-          employeeId,
+          employeeId: managedEmployee.employeeId,
+          FirstName: managedEmployee.employee.FirstName,
+          LastName: managedEmployee.employee.LastName,
           submitted: submittedTimesheets.length > 0,
         };
       })
     );
+
     const submittedEmployees = employeesReport.filter((employee) => employee.submitted);
     const notSubmittedEmployees = employeesReport.filter((employee) => !employee.submitted);
+
     const response = {
       submittedEmployees: submittedEmployees,
       notSubmittedEmployees: notSubmittedEmployees,
