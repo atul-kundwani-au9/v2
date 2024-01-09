@@ -5,6 +5,8 @@ const ExcelJS = require('exceljs');
 const fs = require('fs').promises;
 const { getISOWeek, format ,startOfYear, differenceInDays} = require('date-fns');
 const enUS = require('date-fns/locale/en-US');
+const pool = require('../config/config');
+const axios = require('axios');
 const createManagerEmployee = async (req, res) => {
     try {
       const { managerId, employeeId } = req.body;  
@@ -353,6 +355,7 @@ const getManagerData = async (req, res) => {
                   select: {
                     ProjectID: true,
                     ProjectName: true,
+                    
                     Client: {
                       select: {
                         ClientID: true,
@@ -395,6 +398,7 @@ const getManagerData = async (req, res) => {
               projectList.push({
                 ProjectID: projectId,
                 ProjectName: project.ProjectName,
+                ClientID: clientId,
               });
             }
           }
@@ -513,7 +517,6 @@ const generateEmployeesCSVData = async (employeeIds, startDate, endDate) => {
   return employeesData;
 };
 
-
 const getWeek = (date) => {
   const startOfYearDate = startOfYear(date);
   const differenceDays = differenceInDays(date, startOfYearDate);
@@ -528,11 +531,13 @@ const exportEmployeeCSVs = async (req, res) => {
     const formattedDate = currentDate.replace(/\//g, '-');
     const fileName = `employee-report-${formattedDate}.csv`;
     const filePath = `public/${fileName}`;
-
+    
     const csvWriter = createCsvWriter({
       path: filePath,
       header: [
         { id: 'Name', title: 'Name' },
+        { id: 'Client', title: 'Client' }, 
+        { id: 'Project', title: 'Project' }, 
         { id: 'Month', title: 'Month' },
         { id: 'Week 1', title: 'Week 1' },
         { id: 'Week 2', title: 'Week 2' },
@@ -552,25 +557,39 @@ const exportEmployeeCSVs = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+const getEmployeeLeaves = async (employeeId) => {
+  try {
+    const response = await axios.get(`http://localhost:4000/auth/user-leaves/${employeeId}`);
+    return response.data.leaves; 
+  } catch (error) {
+    console.error(`Error fetching leaves for employee ${employeeId}:`, error);
+    return [];
+  }
+};
 
 const generateEmployeeCSVDatas = async (employeeIds, startDate, endDate) => {
   if (!Array.isArray(employeeIds)) {
     employeeIds = [employeeIds];
   }
+ 
   const employeesData = [];
-  for (const employeeId of employeeIds) {
-    const employee = await prisma.employee.findUnique({
-      where: {
-        EmployeeID: parseInt(employeeId),
-      },
-    });
+for (const employeeId of employeeIds) {
+  // Convert non-integer employeeId to a valid integer (assuming SIL-0005 should be converted to 5)
+  const parsedEmployeeId = isNaN(employeeId) ? parseInt(employeeId.split('-')[1]) : parseInt(employeeId);
 
-    if (!employee) {
-      console.error(`Employee with ID ${employeeId} not found.`);
-      continue; 
-    }
+  const employee = await prisma.employee.findUnique({
+    where: {
+      EmployeeID: parsedEmployeeId,
+    },
+  });
 
-    const timesheets = await getEmployeeTimesheets(employee, startDate, endDate);   
+  if (!employee) {
+    console.error(`Employee with ID ${employeeId} not found.`);
+    continue; 
+  }
+    const timesheets = await getEmployeeTimesheets(employee, startDate, endDate);  
+    const leaves = await getEmployeeLeaves(employeeId);   
+    const totalLeaves = leaves.length;
     const employeeData = {
       'Name': `${employee.FirstName} ${employee.LastName}`,
       'Month': getMonth(startDate),
@@ -583,12 +602,45 @@ const generateEmployeeCSVDatas = async (employeeIds, startDate, endDate) => {
     }
     const totalActualHours = calculateTotalActualHours(employee, startDate, endDate,200);
     const totalBillableHours = calculateTotalBillableHours(timesheets);
+    const projectIds = [...new Set(timesheets.map((timesheet) => timesheet.ProjectID))];
+    const projects = await prisma.project.findMany({
+      where: {
+        ProjectID: {
+          in: projectIds,
+        },
+      },
+      include: {
+        Client: true,
+      },
+    });
+    const projectNamesMap = {};
+projects.forEach((project) => {
+  projectNamesMap[project.ProjectID] = {
+    clientName: project.Client?.ClientName || 'N/A',
+    projectName: project.ProjectName || 'N/A',
+  };
+});
+         const clientNames = [];
+         const projectNames = [];    
+       timesheets.forEach((timesheet) => {
+      const { clientName, projectName } = projectNamesMap[timesheet.ProjectID] || {};
+      if (!clientNames.includes(clientName)) {
+        clientNames.push(clientName);
+      }
+      if (!projectNames.includes(projectName)) {
+        projectNames.push(projectName);
+      }
+    });  
+    
+    employeeData['Client Name'] = clientNames.join(',');
+    employeeData['Project Name'] = projectNames.join(',')
     employeeData['Total Actual Hours'] = totalActualHours;
     employeeData['Total Billable Hours'] = totalBillableHours;
-    employeeData['Comments'] = 'Your comments here';
+    employeeData['Comments'] = `Total Leaves Taken: ${totalLeaves}`;
+    console.log(totalLeaves)
     employeesData.push(employeeData);
   }
- 
+  console.log(employeesData)
   return employeesData;
 };
 
@@ -803,8 +855,33 @@ const getMonth = (startDate) => {
 //   return format(new Date(startDate), 'MMMM', { locale: enUS });
 // };
 
+// const getUserLeaves = async (employeeId) => {
+//   const sql = `
+//     SELECT s.employeeId, l.leavetypeid, l.leaveday, l.from_date, l.to_date
+//     FROM main_employees_summary s
+//     JOIN main_leaverequest l ON s.user_id = l.user_id
+//     WHERE s.employeeId = ?;
+//   `;
 
+//   return new Promise((resolve, reject) => {
+//     pool.query(sql, [employeeId], (error, results) => {
+//       if (error) {
+//         console.error('Error executing query:', error.sqlMessage);
+//         return reject(error);
+//       }
+
+//       if (results.length > 0) {
+//         const successMessage = 'Leaves found for the user.';
+//         resolve({ successMessage, leaves: results });
+//       } else {
+//         const errorMessage = 'No leaves found for the user.';
+//         resolve({ errorMessage, leaves: [] });
+//       }
+//     });
+//   });
+// };
 module.exports = {
+  // getUserLeaves,
   exportEmployeeCSVs,
   // exportEmployeesExcel,
   exportEmployeesCSV,

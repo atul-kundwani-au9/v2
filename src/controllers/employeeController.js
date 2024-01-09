@@ -150,7 +150,6 @@ const getEmployeeProfile = async (req, res) => {
 
 const getEmployeewithManager = async (req, res) => {
   try {
-
     const employee = await prisma.employee.findMany({
       include: {
         managingEmployees: {

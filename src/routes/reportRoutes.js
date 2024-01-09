@@ -7,5 +7,4 @@ router.get('/client/:clientId',authMiddleware.authenticate, reportController.get
 router.get('/project/:projectId', authMiddleware.authenticate,reportController.getProjectReport);
 router.get('/employee/:employeeId', authMiddleware.authenticate,reportController.getEmployeeReport);
 router.post('/report', authMiddleware.authenticate, reportController.getManagerReport);
-
 module.exports = router;

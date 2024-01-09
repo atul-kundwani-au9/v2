@@ -245,29 +245,7 @@ const approveTimesheet = async (req, res) => {
       },
     });
 
-//     employees.forEach(async (employee) => {
-//       const mailOptions = {
-//         from: 'navathesiddhartha990@gmail.com',
-//         to: employee.Email,
-//         subject: 'Timesheet Approved',
-//         text: `Dear ${employee.FirstName} ${employee.LastName},\n\nYour timesheet has been approved. Thank you for your submission.`,
-//       };
 
-//       transporter.sendMail(mailOptions, (error, info) => {
-//         if (error) {
-//           console.error(`Error sending email to ${employee.Email}:`, error);
-//         } else {
-//           console.log(`Email sent to ${employee.Email}:`, info.response);
-//         }
-//       });
-//     });
-
-//     res.json({ message: 'Timesheets approved successfully', updatedTimesheets });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: 'Internal Server Error' });
-//   }
-// };
 for (const employeeId of employeeIds) {
   const employee = await prisma.employee.findUnique({
     where: {
@@ -281,20 +259,7 @@ for (const employeeId of employeeIds) {
     },
   });
 
-//   const mailOptions = {
-//     from: 'navathesiddhartha990@gmail.com',
-//     to: employee.Email,
-//     subject: 'Timesheet Approved',
-//     text: `Dear ${employee.FirstName} ${employee.LastName},\n\nYour timesheet has been approved. Thank you for your submission.`,
-//   };
 
-//   transporter.sendMail(mailOptions, (error, info) => {
-//     if (error) {
-//       console.error(`Error sending email to ${employee.Email}:`, error);
-//     } else {
-//       console.log(`Email sent to ${employee.Email}:`, info.response);
-//     }
-//   });
 }
 console.log(updatedTimesheets)
 res.json({ message: 'Timesheets approved successfully', updatedTimesheets });
@@ -395,29 +360,7 @@ const rejectTimesheet = async (req, res) => {
       },
     });
 
-//     employees.forEach(async (employee) => {
-//       const mailOptions = {
-//         from: 'navathesiddhartha990@gmail.com',
-//         to: employee.Email,
-//         subject: 'Timesheet Rejected',
-//         text: `Dear ${employee.FirstName} ${employee.LastName},\n\nYour timesheet has been rejected. Reason: ${rejectionComment || 'No comment provided'}. Please review and contact your manager for more details.`,
-//       };
 
-//       transporter.sendMail(mailOptions, (error, info) => {
-//         if (error) {
-//           console.error(`Error sending email to ${employee.Email}:`, error);
-//         } else {
-//           console.log(`Email sent to ${employee.Email}:`, info.response);
-//         }
-//       });
-//     });
-
-//     res.json({ message: 'Timesheets rejected successfully', updatedTimesheets });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: 'Internal Server Error' });
-//   }
-// };
 
 for (const employeeId of employeeIds) {
   const employee = await prisma.employee.findUnique({
