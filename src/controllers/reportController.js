@@ -71,9 +71,6 @@ const getEmployeeReport = async (req, res) => {
     res.status(500).json({ status: 'error', message: 'Internal Server Error' });
   }
 };
-
-
-
 const getManagerReport = async (req, res) => {
   try {
     const { managerId, startDate, endDate } = req.body;
@@ -138,8 +135,6 @@ const getManagerReport = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
-
-
 
 module.exports = {
   getManagerReport,

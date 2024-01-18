@@ -11,13 +11,15 @@ datasource db {
 // Employee table
 model Employee {
   EmployeeID     Int      @id @default(autoincrement())
+  EmployeeCode   String     @default("")  
   FirstName      String
-  LastName       String
-  Email          String    @unique
+  LastName       String       @default("")  
+  Email          String     
   Password       String
-  Admin          Boolean
+  Admin          Int
   EmployeeType   String   // Assuming "regular" or "manager"
    clientId       Int?     // Nullable field if applicable
+  
   // Default Values
   DefaultHours    Float    @default(8)                 
   DefaultProject  String   @default("")  
@@ -82,5 +84,4 @@ model ManagerEmployee {
   // Composite primary key
   @@id([employeeId, managerId])
 }
-
 

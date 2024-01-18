@@ -1,5 +1,3 @@
-
-
 const express = require('express');
 const router = express.Router();
 const employeeController = require('../controllers/employeeController');
@@ -9,4 +7,5 @@ router.post('/login', employeeController.loginEmployee);
 router.get('/list', authMiddleware.authenticate, employeeController.getEmployeeList);
 router.get('/profile/:employeeId', authMiddleware.authenticate, employeeController.getEmployeeProfile);
 router.get('/employeelist', employeeController.getEmployeewithManager);
+router.post('/reset-password/:employeeId', authMiddleware.authenticate, employeeController.resetEmployeePassword);
 module.exports = router;

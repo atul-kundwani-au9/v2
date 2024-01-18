@@ -1,7 +1,7 @@
 
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
-
+const bcrypt = require('bcrypt');
 const createEmployee = async (data) => {
   return prisma.employee.create({
     data,
@@ -38,7 +38,21 @@ const getEmployeeProfileById = async (employeeId) => {
     },
   });
 };
+
+const resetPassword = async (employeeId, newPassword) => {
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+  return prisma.employee.update({
+    where: {
+      EmployeeID: employeeId,
+    },
+    data: {
+      Password: hashedPassword,
+    },
+  });
+};
 module.exports = {
+  resetPassword,
   createEmployee,
   getEmployeeByEmail,
   getEmployees,

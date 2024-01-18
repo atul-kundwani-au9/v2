@@ -16,7 +16,8 @@ const registerEmployee = async (req, res) => {
       Password: hashedPassword,
       Admin,
       EmployeeType,
-      name
+      name,
+     
     });
 
     res.json({ status: 'success', message: 'Employee registered successfully', data: employee });
@@ -28,10 +29,13 @@ const registerEmployee = async (req, res) => {
 const loginEmployee = async (req, res) => {
   try {
     const { Email, Password } = req.body;
-
+    console.log('Email:', Email);
     const employee = await employeeModel.getEmployeeByEmail(Email);
-
+    console.log('Retrieved employee:', employee);
+    console.log(await bcrypt.compare(Password, employee.Password));
+     
     if (!employee || !(await bcrypt.compare(Password, employee.Password))) {
+      
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
@@ -187,7 +191,25 @@ const getEmployeewithManager = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+const resetEmployeePassword = async (req, res) => {
+  try {
+    const { employeeId } = req.params;
+    const { newPassword } = req.body;  
+
+    const updatedEmployee = await employeeModel.resetPassword(parseInt(employeeId), newPassword);
+
+    if (!updatedEmployee) {
+      return res.status(404).json({ error: 'Employee not found' });
+    }
+
+    res.json({ status: 'success', message: 'Password reset successfully', data: updatedEmployee });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
 module.exports = {
+  resetEmployeePassword,
   getEmployeeProfile,
   registerEmployee,
   loginEmployee,

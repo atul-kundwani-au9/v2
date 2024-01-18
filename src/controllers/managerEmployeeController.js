@@ -560,6 +560,7 @@ const exportEmployeeCSVs = async (req, res) => {
 const getEmployeeLeaves = async (employeeId) => {
   try {
     const response = await axios.get(`http://localhost:4000/auth/user-leaves/${employeeId}`);
+    console.log('Axios Response:', response.data);
     return response.data.leaves; 
   } catch (error) {
     console.error(`Error fetching leaves for employee ${employeeId}:`, error);
@@ -575,8 +576,7 @@ const generateEmployeeCSVDatas = async (employeeIds, startDate, endDate) => {
   const employeesData = [];
 for (const employeeId of employeeIds) {
   // Convert non-integer employeeId to a valid integer (assuming SIL-0005 should be converted to 5)
-  const parsedEmployeeId = isNaN(employeeId) ? parseInt(employeeId.split('-')[1]) : parseInt(employeeId);
-
+  const parsedEmployeeId = isNaN(employeeId) ? parseInt(employeeId.split('-')[1]) : parseInt(employeeId); 
   const employee = await prisma.employee.findUnique({
     where: {
       EmployeeID: parsedEmployeeId,
@@ -589,6 +589,7 @@ for (const employeeId of employeeIds) {
   }
     const timesheets = await getEmployeeTimesheets(employee, startDate, endDate);  
     const leaves = await getEmployeeLeaves(employeeId);   
+    // const monthWiseLeaves = getMonthWiseLeaves(leaves, startDate, endDate);
     const totalLeaves = leaves.length;
     const employeeData = {
       'Name': `${employee.FirstName} ${employee.LastName}`,
