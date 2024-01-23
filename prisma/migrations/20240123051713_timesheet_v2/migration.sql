@@ -1,11 +1,12 @@
 -- CreateTable
 CREATE TABLE `Employee` (
     `EmployeeID` INTEGER NOT NULL AUTO_INCREMENT,
+    `EmployeeCode` VARCHAR(191) NOT NULL DEFAULT '',
     `FirstName` VARCHAR(191) NOT NULL,
-    `LastName` VARCHAR(191) NOT NULL,
+    `LastName` VARCHAR(191) NOT NULL DEFAULT '',
     `Email` VARCHAR(191) NOT NULL,
     `Password` VARCHAR(191) NOT NULL,
-    `Admin` BOOLEAN NOT NULL,
+    `Admin` INTEGER NOT NULL,
     `EmployeeType` VARCHAR(191) NOT NULL,
     `clientId` INTEGER NULL,
     `DefaultHours` DOUBLE NOT NULL DEFAULT 8,
@@ -14,7 +15,6 @@ CREATE TABLE `Employee` (
     `DefaultProjectId` VARCHAR(191) NOT NULL DEFAULT '',
     `concat(FirstName, ' ', LastName)` VARCHAR(191) NOT NULL,
 
-    UNIQUE INDEX `Employee_Email_key`(`Email`),
     PRIMARY KEY (`EmployeeID`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 

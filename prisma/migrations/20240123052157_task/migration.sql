@@ -1,0 +1,20 @@
+-- CreateTable
+CREATE TABLE `Task` (
+    `TaskID` INTEGER NOT NULL AUTO_INCREMENT,
+    `ProjectID` INTEGER NOT NULL,
+    `TaskName` VARCHAR(191) NOT NULL,
+    `EmployeeID` INTEGER NOT NULL,
+    `Hours` DOUBLE NOT NULL,
+    `TaskStatus` VARCHAR(191) NOT NULL DEFAULT 'todo',
+    `CreatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `UpdatedAt` DATETIME(3) NOT NULL,
+    `Date` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`TaskID`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- AddForeignKey
+ALTER TABLE `Task` ADD CONSTRAINT `Task_ProjectID_fkey` FOREIGN KEY (`ProjectID`) REFERENCES `Project`(`ProjectID`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Task` ADD CONSTRAINT `Task_EmployeeID_fkey` FOREIGN KEY (`EmployeeID`) REFERENCES `Employee`(`EmployeeID`) ON DELETE RESTRICT ON UPDATE CASCADE;

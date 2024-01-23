@@ -567,7 +567,34 @@ const getEmployeeLeaves = async (employeeId) => {
     return [];
   }
 };
+const getMonthWiseLeaves = (leaves, startDate, endDate) => {
+  const monthWiseLeaves = {};
 
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+
+  // Iterate through each leave and categorize them by month
+  leaves.forEach((leave) => {
+    const leaveDate = new Date(leave.from_date);
+    
+    // Check if the leave is within the specified date range
+    if (leaveDate >= start && leaveDate <= end) {
+      const month = format(leaveDate, 'MMMM', { locale: enUS });
+
+      if (!monthWiseLeaves[month]) {
+        monthWiseLeaves[month] = [];
+      }
+
+      monthWiseLeaves[month].push({
+        leaveday: leave.leaveday,
+        from_date: leave.from_date,
+        to_date: leave.to_date,
+      });
+    }
+  });
+
+  return monthWiseLeaves;
+};
 const generateEmployeeCSVDatas = async (employeeIds, startDate, endDate) => {
   if (!Array.isArray(employeeIds)) {
     employeeIds = [employeeIds];
@@ -589,7 +616,7 @@ for (const employeeId of employeeIds) {
   }
     const timesheets = await getEmployeeTimesheets(employee, startDate, endDate);  
     const leaves = await getEmployeeLeaves(employeeId);   
-    // const monthWiseLeaves = getMonthWiseLeaves(leaves, startDate, endDate);
+    const monthWiseLeaves = getMonthWiseLeaves(leaves, startDate, endDate);
     const totalLeaves = leaves.length;
     const employeeData = {
       'Name': `${employee.FirstName} ${employee.LastName}`,
@@ -637,14 +664,32 @@ projects.forEach((project) => {
     employeeData['Project Name'] = projectNames.join(',')
     employeeData['Total Actual Hours'] = totalActualHours;
     employeeData['Total Billable Hours'] = totalBillableHours;
-    employeeData['Comments'] = `Total Leaves Taken: ${totalLeaves}`;
-    console.log(totalLeaves)
+//     employeeData['Comments'] = `Total Leaves Taken: ${totalLeaves}`;
+//     console.log(totalLeaves)
+//     employeesData.push(employeeData);
+//   }
+//   console.log(employeesData)
+//   return employeesData;
+// };
+const leaveComments = generateLeaveComments(monthWiseLeaves);
+    employeeData['Comments'] = `Total Leaves Taken: ${totalLeaves}${leaveComments}`;
+    console.log(totalLeaves);
     employeesData.push(employeeData);
   }
-  console.log(employeesData)
+  console.log(employeesData);
   return employeesData;
 };
 
+
+const generateLeaveComments = (monthWiseLeaves) => {
+  let leaveComments = '';
+  for (const [month, leaves] of Object.entries(monthWiseLeaves)) {
+    for (const leave of leaves) {
+      leaveComments += `\n${month}: ${leave.leaveday} (${leave.from_date} to ${leave.to_date})`;
+    }
+  }
+  return leaveComments;
+};
 const getEmployeeTimesheets = async (employee, startDate, endDate) => {
   const timesheets = await prisma.timesheet.findMany({
     where: {
