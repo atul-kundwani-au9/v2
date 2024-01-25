@@ -9,21 +9,22 @@ datasource db {
 
 // Employee table
 model Employee {
-  EmployeeID        Int               @id @default(autoincrement())
+  EmployeeID      String             @id @db.VarChar(255)
   EmployeeCode      String            @default("")  
   FirstName         String
   LastName          String            @default("")  
-  Email             String     
+  Email             String            @unique 
   Password          String
   Admin             Int
   EmployeeType      String            // Assuming "regular" or "manager"
   clientId          Int?              // Nullable field if applicable
-  
+ 
   // Default Values
   DefaultHours      Float             @default(8)                 
   DefaultProject    String            @default("")  
   DefaultClient     String            @default("")  
   DefaultProjectId  String            @default("") 
+ 
   // Derived field for full name
   name              String            @map("concat(FirstName, ' ', LastName)")
 
@@ -36,51 +37,56 @@ model Employee {
 
 // Client table
 model Client {
-  ClientID      Int      @id @default(autoincrement())
-  ClientName    String
-  ContactPerson String
-  ContactEmail  String
-
+  ClientID          Int               @id @default(autoincrement())
+  ClientName        String
+  ContactPerson     String
+  ContactEmail      String
+  CreatedAt         DateTime          @default(now()) 
+ UpdatedAt         DateTime            @updatedAt @default(now()) 
   // Relationships
-  Projects Project[]
+  Projects          Project[]
 }
 
 // Project table
 model Project {
-  ProjectID   Int      @id @default(autoincrement())
-  ProjectName String
-  ClientID    Int
-   
+  ProjectID         Int               @id @default(autoincrement())
+  ProjectName       String
+  ClientID          Int
+  CreatedAt         DateTime          @default(now()) 
+  UpdatedAt         DateTime           @updatedAt @default(now())
   // Relationships
-  Client     Client      @relation(fields: [ClientID], references: [ClientID])
-  Timesheets Timesheet[]
-  Tasks      Task[]
+  Client            Client            @relation(fields: [ClientID], references: [ClientID])
+  Timesheets        Timesheet[]
+  Tasks             Task[]
 }
 
 // Timesheet table
 model Timesheet {
-  TimesheetID       Int      @id @default(autoincrement())
-  EmployeeID        Int
+  TimesheetID       Int               @id @default(autoincrement())
+  EmployeeID        String
   ProjectID         Int
   Date              DateTime
   Status            String
   HoursWorked       Float
   Description       String
-  RejectionComment  String  @default("")
-  Comment           String  @default("")
+  RejectionComment  String            @default("")
+  Comment           String            @default("")
+  CreatedAt         DateTime          @default(now()) 
+  UpdatedAt         DateTime          @updatedAt @default(now()) 
   // Relationships
-  Employee          Employee @relation(fields: [EmployeeID], references: [EmployeeID])
-  Project           Project  @relation(fields: [ProjectID], references: [ProjectID])
+  Employee          Employee          @relation(fields: [EmployeeID], references: [EmployeeID])
+  Project           Project           @relation(fields: [ProjectID], references: [ProjectID])
 }
 
 // ManagerEmployee table
 model ManagerEmployee {
-  managerId         Int // Manager ID
-  employeeId       Int // Employee ID
-
+  managerId        String             // Manager ID
+  employeeId       String          // Employee ID
+  CreatedAt         DateTime          @default(now()) 
+ UpdatedAt         DateTime           @updatedAt @default(now()) 
   // Relationships
-  manager           Employee @relation("ManagerEmployees_manager", fields: [managerId], references: [EmployeeID])
-  employee          Employee @relation("ManagerEmployees_employee", fields: [employeeId], references: [EmployeeID])
+  manager           Employee          @relation("ManagerEmployees_manager", fields: [managerId], references: [EmployeeID])
+  employee          Employee          @relation("ManagerEmployees_employee", fields: [employeeId], references: [EmployeeID])
    
   // Composite primary key
   @@id([employeeId, managerId])
@@ -88,17 +94,16 @@ model ManagerEmployee {
 
 // Task table
 model Task {
-  TaskID            Int      @id @default(autoincrement())
+  TaskID            Int               @id @default(autoincrement())
   ProjectID         Int
   TaskName          String
-  EmployeeID        Int
+  EmployeeID        String
   Hours             Float
-  TaskStatus        String   @default("todo")
-  CreatedAt         DateTime @default(now()) 
-  UpdatedAt         DateTime @updatedAt 
-  Date              DateTime
-  
+  TaskStatus        String            @default("todo")
+  CreatedAt         DateTime          @default(now()) 
+  UpdatedAt         DateTime          @updatedAt 
+  Date              DateTime          @default(now()) // Added default for Date field
   // Relationships
-  Project           Project  @relation(fields: [ProjectID], references: [ProjectID])
-  Employee          Employee @relation(fields: [EmployeeID], references: [EmployeeID])
+  Project           Project           @relation(fields: [ProjectID], references: [ProjectID])
+  Employee          Employee          @relation(fields: [EmployeeID], references: [EmployeeID])
 }

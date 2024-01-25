@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `manageremployee` MODIFY `UpdatedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3);

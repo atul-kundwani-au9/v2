@@ -606,7 +606,7 @@ for (const employeeId of employeeIds) {
   const parsedEmployeeId = isNaN(employeeId) ? parseInt(employeeId.split('-')[1]) : parseInt(employeeId); 
   const employee = await prisma.employee.findUnique({
     where: {
-      EmployeeID: parsedEmployeeId,
+      EmployeeID: parsedEmployeeId.toString(),
     },
   });
 

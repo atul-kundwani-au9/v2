@@ -163,7 +163,7 @@ const approveTimesheet = async (req, res) => {
       data: {
         Status: 'approved',
       },
-
+       
     });
     console.log(updateResult)
     const updatedTimesheets = await prisma.timesheet.findMany({
@@ -214,8 +214,6 @@ for (const employeeId of employeeIds) {
       Email: true,
     },
   });
-
-
 }
 console.log(updatedTimesheets)
 res.json({ message: 'Timesheets approved successfully', updatedTimesheets });
@@ -230,7 +228,6 @@ const pendingTimesheet = async (req, res) => {
 
     const updatedTimesheet = await prisma.timesheet.update({
       where: {
-
         EmployeeID: employeeId,
         Date: {
           gte: startDate,

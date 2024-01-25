@@ -63,7 +63,7 @@ try {
  
   const createdEmployee = await prisma.employee.create({
     data: {
-      EmployeeCode: externalEmployee.employeeId,
+      EmployeeID: externalEmployee.employeeId,
       FirstName: externalEmployee.firstname,
       Email: externalEmployee.emailaddress,
       Password: hashedPassword,
@@ -78,7 +78,7 @@ try {
     },
   });
 
-  console.log(`Created or updated employee: ${createdEmployee.EmployeeCode}`);
+  console.log(`Created or updated employee: ${createdEmployee.EmployeeID}`);
 } catch (error) {
   
   if (error.code === 'P2002' && error.meta?.target?.includes('Email')) {
